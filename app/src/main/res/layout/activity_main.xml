@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="2">
+
+        <!-- 수정할 사진 넣을 공간 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_marginTop="90dp">
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/camera"/>
+        </LinearLayout>
+
+        <!-- 상단 콘텐츠 (항상 보임) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@android:color/darker_gray"
+            android:padding="10dp"
+            android:backgroundTint="@color/white">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="[적용제품 목록]"
+                    android:textSize="18dp"
+                    android:textStyle="bold"
+                    android:layout_weight="1"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="전체삭제"
+                    android:textSize="18dp"
+                    android:textColor="@color/blue"
+                    android:layout_weight="1"
+                    android:textAlignment="textEnd"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textViewContent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="항상 보이는 내용 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용
+                항상 보이는 내용 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용
+                항상 보이는 내용 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용"
+                android:textSize="15dp"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+
+            <!-- 더보기 버튼 -->
+            <TextView
+                android:id="@+id/textExpand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginTop="5dp"
+                android:text="더보기 +"
+                android:textSize="15dp"
+                android:textColor="@color/gray"/>
+        </LinearLayout>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/changable"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="2">
+    <!--  중간 사진촬영 버튼, 갤러리 버튼, 로고  -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="bottom">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp">
+                <ImageButton
+                    android:layout_width="60dp"
+                    android:layout_height="50dp"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/gallery"/>
+                <ImageButton
+                    android:layout_width="60dp"
+                    android:layout_height="50dp"
+                    android:layout_alignParentRight="true"
+                    android:src="@drawable/gallery"/>
+            </RelativeLayout>
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/logo"/>
+
+        </LinearLayout>
+    </FrameLayout>
+
+<!--  하단 카테고리바(피부, 립, 헤어 선택가능)  -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="bottom"
+        android:layout_weight="0.5">
+        <TextView
+            android:id="@+id/category_skin"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="피부"
+            android:textSize="30sp"
+            android:gravity="center"
+            android:layout_weight="1"/>
+        <TextView
+            android:id="@+id/category_lip"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="립"
+            android:textSize="30sp"
+            android:gravity="center"
+            android:layout_weight="1"/>
+        <TextView
+            android:id="@+id/category_hair"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="헤어"
+            android:textSize="30sp"
+            android:gravity="center"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+</LinearLayout>
