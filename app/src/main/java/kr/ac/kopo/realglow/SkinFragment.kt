@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TabHost
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -34,7 +35,50 @@ class SkinFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_skin, container, false)
+        val view = inflater.inflate(R.layout.fragment_skin, container, false)
+
+        // TabHost 초기화
+        val tabHost = view.findViewById<TabHost>(R.id.tabHost)
+        tabHost.setup()
+
+        // Tab1 설정
+        var spec = tabHost.newTabSpec("Tab 1")
+        spec.setContent(R.id.tabproduct1)
+        spec.setIndicator("제품명1")
+        tabHost.addTab(spec)
+
+        // Tab2 설정
+        spec = tabHost.newTabSpec("Tab 2")
+        spec.setContent(R.id.tabproduct2)
+        spec.setIndicator("제품명2")
+        tabHost.addTab(spec)
+
+        // Tab3 설정
+        spec = tabHost.newTabSpec("Tab 3")
+        spec.setContent(R.id.tabproduct3)
+        spec.setIndicator("제품명3")
+        tabHost.addTab(spec)
+
+        // Tab3 설정
+        spec = tabHost.newTabSpec("Tab 4")
+        spec.setContent(R.id.tabproduct4)
+        spec.setIndicator("제품명4")
+        tabHost.addTab(spec)
+
+        // Tab3 설정
+        spec = tabHost.newTabSpec("Tab 5")
+        spec.setContent(R.id.tabproduct5)
+        spec.setIndicator("제품명5")
+        tabHost.addTab(spec)
+
+        // Tab3 설정
+        spec = tabHost.newTabSpec("Tab 6")
+        spec.setContent(R.id.tabproduct6)
+        spec.setIndicator("제품명6")
+        tabHost.addTab(spec)
+
+        return view
+
     }
 
     companion object {

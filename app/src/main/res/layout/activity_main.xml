@@ -8,20 +8,19 @@
     tools:context=".MainActivity">
 
     <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="2">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
         <!-- 수정할 사진 넣을 공간 -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="350dp"
             android:orientation="horizontal"
             android:layout_marginTop="90dp">
             <ImageView
+                android:id="@+id/imgV"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/camera"/>
+                android:layout_height="match_parent"/>
         </LinearLayout>
 
         <!-- 상단 콘텐츠 (항상 보임) -->
@@ -77,47 +76,71 @@
         </LinearLayout>
     </FrameLayout>
 
+    <!--  중간 사진촬영 버튼, 갤러리 버튼  -->
     <FrameLayout
-        android:id="@+id/changable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="2">
-    <!--  중간 사진촬영 버튼, 갤러리 버튼, 로고  -->
+        android:orientation="horizontal"
+        android:padding="10dp">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="bottom">
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="10dp">
-                <ImageButton
-                    android:layout_width="60dp"
-                    android:layout_height="50dp"
-                    android:layout_centerHorizontal="true"
-                    android:src="@drawable/gallery"/>
-                <ImageButton
-                    android:layout_width="60dp"
-                    android:layout_height="50dp"
-                    android:layout_alignParentRight="true"
-                    android:src="@drawable/gallery"/>
-            </RelativeLayout>
+            android:gravity="left">
+            <ImageButton
+                android:id="@+id/btnSave"
+                android:layout_width="60dp"
+                android:layout_height="50dp"
+                android:src="@drawable/gallery"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+            <ImageButton
+                android:id="@+id/btnCapture"
+                android:layout_width="60dp"
+                android:layout_height="50dp"
+                android:src="@drawable/gallery"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right">
+            <ImageButton
+                android:id="@+id/btnGallery"
+                android:layout_width="60dp"
+                android:layout_height="50dp"
+                android:src="@drawable/gallery"/>
+        </LinearLayout>
+    </FrameLayout>
+
+    <!--  로고  -->
+    <FrameLayout
+        android:id="@+id/fragmentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="10dp"
+        android:layout_weight="1">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/logo"/>
-
         </LinearLayout>
     </FrameLayout>
 
-<!--  하단 카테고리바(피부, 립, 헤어 선택가능)  -->
+    <!--  하단 카테고리바(피부, 립, 헤어 선택가능)  -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="bottom"
-        android:layout_weight="0.5">
+        android:layout_weight="0.1">
         <TextView
             android:id="@+id/category_skin"
             android:layout_width="wrap_content"
@@ -142,6 +165,5 @@
             android:textSize="30sp"
             android:gravity="center"
             android:layout_weight="1"/>
-
     </LinearLayout>
 </LinearLayout>
