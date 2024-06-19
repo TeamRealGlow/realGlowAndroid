@@ -4,14 +4,168 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".SkinFragment"
-    android:background="#F19B9B">
+    android:background="@color/white">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:id="@+id/frag_skin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="피부"
-        android:textSize="40sp"/>
+
+    <TabHost
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/tabHost">
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+            </TabWidget>
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tabproduct1"
+                    android:orientation="vertical" >
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <ImageView
+                            android:id="@+id/skin_none1"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:src="@drawable/exclusion"/>
+                        <View
+                            android:id="@+id/skinColor1_1"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:background="#FDF2D1"/>
+
+                        <View
+                            android:id="@+id/skinColor1_2"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:background="#FFF3C9"/>
+
+                        <View
+                            android:id="@+id/skinColor1_3"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:background="#FDEEC0"/>
+                        <View
+                            android:id="@+id/skinColor1_4"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:background="#FFE5B8"/>
+
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:id="@+id/tabproduct2">
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <ImageView
+                            android:id="@+id/skin_none2"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:src="@drawable/exclusion"/>
+                        <View
+                            android:id="@+id/skinColor2_1"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:background="#FAF0D3"/>
+
+                        <View
+                            android:id="@+id/skinColor2_2"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:background="#F8EECB"/>
+
+                        <View
+                            android:id="@+id/skinColor2_3"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:background="#F6E8BB"/>
+                        <View
+                            android:id="@+id/skinColor2_4"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:background="#F4DDB4"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:id="@+id/tabproduct3">
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <ImageView
+                            android:id="@+id/skin_none3"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:src="@drawable/exclusion"/>
+                        <View
+                            android:id="@+id/skinColor3_1"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:background="#FFF6DA"/>
+
+                        <View
+                            android:id="@+id/skinColor3_2"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:background="#FDF2CE"/>
+                        <View
+                            android:id="@+id/skinColor3_3"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:background="#F1E2B5"/>
+                        <View
+                            android:id="@+id/skinColor3_4"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_margin="20dp"
+                            android:background="#F4DBB0"/>
+
+                    </LinearLayout>
+                </LinearLayout>
+
+
+
+            </FrameLayout>
+        </LinearLayout>
+    </TabHost>
+
 
 </FrameLayout>
