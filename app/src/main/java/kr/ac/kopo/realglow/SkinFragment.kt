@@ -1,5 +1,7 @@
 package kr.ac.kopo.realglow
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -7,8 +9,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TabHost
+import android.widget.TextView
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -25,12 +29,16 @@ private const val ARG_PARAM2 = "param2"
  */
 class SkinFragment : Fragment() {
     // TODO: Rename and change types of parameters
+    val TAG = "TAG_MainActivity" // 로그 분류 태그
     private var param1: String? = null
     private var param2: String? = null
+    lateinit var textViewContent : TextView
 
     lateinit var mRetrofit: Retrofit
     lateinit var mRetrofitAPI: RetrofitAPI
-    lateinit var mCallItemInfo: retrofit2.Call<JsonObject>
+    lateinit var mCallSkinItemInfo: retrofit2.Call<JsonObject>
+
+    private var itemLink: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,8 +53,11 @@ class SkinFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_skin, container, false)
+
+        textViewContent = activity?.findViewById(R.id.textViewContent) ?: throw IllegalStateException("TextView not found")
 
         // TabHost 초기화
         val tabHost = view.findViewById<TabHost>(R.id.tabHost)
@@ -73,11 +84,20 @@ class SkinFragment : Fragment() {
 
 
         setRetrofit()//레트로핏 세팅
-        val skinColor1_1 = view.findViewById<View>(R.id.skinColor1_1)
+        val item1 = view.findViewById<View>(R.id.skinColor1_1)
         //버튼 클릭하면 가져오기
-        skinColor1_1.setOnClickListener {
-            callItemInfo()
+        item1.setOnClickListener {
+            callLoadItem("skin")
         }
+
+        textViewContent.setOnClickListener {
+            itemLink?.let {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
+                startActivity(intent)
+            }
+        }
+
+
 
 
         return view
@@ -96,39 +116,41 @@ class SkinFragment : Fragment() {
         mRetrofitAPI = mRetrofit.create(RetrofitAPI::class.java)
     }
 
-    // 리스트를 불러온다.
-    private fun callItemInfo() {
-        mCallItemInfo = mRetrofitAPI.getLoadItem()
-        mCallItemInfo.enqueue(mRetrofitCallback)//응답을 큐 대기열에 넣는다.
-    }
 
-    //http요청을 보냈고 이건 응답을 받을 콜벡메서드
-    private val mRetrofitCallback  = (object : retrofit2.Callback<JsonObject>{
-        override fun onFailure(call: retrofit2.Call<JsonObject>, t: Throwable) {
-            t.printStackTrace()
-            //Log.d(TAG, "에러입니다. => ${t.message.toString()}")
-            //textViewContent.text = "에러\n" + t.message.toString()
+
+    private val mRetrofitCallback = (object : retrofit2.Callback<JsonObject>{
+        override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+            // 서버에서 데이터 요청 성공시
+            val result = response.body()
+            Log.d("testt", "결과는 ${result}")
+            var gson = Gson();
+            val dataParsed1 = gson.fromJson(result, RetrofitDTO.skinText::class.java)
+
+            if (dataParsed1.row.isNotEmpty()) {
+                val firstItem = dataParsed1.row[0]
+                val stringBuilder = StringBuilder()
+                stringBuilder.append("${firstItem.itemName}\t${firstItem.ColorName[0]}\n${firstItem.Link}")
+
+                textViewContent.text = stringBuilder.toString()
+                itemLink = firstItem.Link
+            } else {
+                textViewContent.text = "No data available"
+            }
+            //val chatItem = RetrofitDTO.hairText(dataParsed1.Item, TYPE_BOT)
+//            Log.d("testt",dataParsed1.row[0].Link );
         }
 
-        override fun onResponse(call: retrofit2.Call<JsonObject>, response: Response<JsonObject>) {
-            val result = response.body()
-            Log.d("abcvdedefsdf", "결과는 => $result")
-
-
-            var mGson = Gson()
-            val dataParsed = mGson.fromJson(result, DataModel::class.java)
-
-            val stringBuilder = StringBuilder()
-            dataParsed.row.forEach { row ->
-                stringBuilder.append("Item Name: ${row.ItemName.a}\n")
-                stringBuilder.append("Color: ${row.Color.a}\n")
-                stringBuilder.append("Company: ${row.Company.a}\n")
-                stringBuilder.append("Link: ${row.Link.a}\n\n")
-            }
-
-            //textViewContent.text = stringBuilder.toString()
+        override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+            // 서버 요청 실패
+            t.printStackTrace()
+            Log.d("testt", "에러입니다. ${t.message}")
         }
     })
+
+    private fun callLoadItem(skinItem: String){
+        mCallSkinItemInfo = mRetrofitAPI.getLoadSkinItem(skinItem) // RetrofitAPI 에서 JSON 객체를 요청해서 반환하는 메소드 호출
+        mCallSkinItemInfo.enqueue(mRetrofitCallback) // 응답을 큐에 넣어 대기 시켜놓음. 즉, 응답이 생기면 뱉어낸다.
+    }
 
     companion object {
         /**

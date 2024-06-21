@@ -46,9 +46,6 @@ import kotlin.random.Random
 
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
-    val TAG = "TAG_MainActivity" // 로그 분류 태그
-
-
     val CAMERA_CODE = 98
     val STORAGE_CODE = 99
 
@@ -341,6 +338,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         val fileName = SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis())
         return fileName
     }
+
+
 }
 
 

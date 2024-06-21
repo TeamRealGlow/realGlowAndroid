@@ -39,14 +39,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="[적용제품 목록]"
-                    android:textSize="18dp"
+                    android:textSize="30dp"
                     android:textStyle="bold"
                     android:layout_weight="1"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="전체삭제"
-                    android:textSize="18dp"
+                    android:textSize="25dp"
                     android:textColor="@color/blue"
                     android:layout_weight="1"
                     android:textAlignment="textEnd"/>
@@ -54,12 +54,13 @@
 
             <TextView
                 android:id="@+id/textViewContent"
+                android:layout_marginTop="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="항상 보이는 내용 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용
                 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용
                 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용 항상 보이는 내용"
-                android:textSize="15dp"
+                android:textSize="25dp"
                 android:maxLines="1"
                 android:ellipsize="end"/>
 
@@ -69,9 +70,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="10dp"
                 android:text="더보기 +"
-                android:textSize="15dp"
+                android:textSize="25dp"
                 android:textColor="@color/gray"/>
         </LinearLayout>
     </FrameLayout>
