@@ -43,6 +43,9 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.random.Random
+import android.util.Base64
+import retrofit2.Callback
+import java.io.ByteArrayOutputStream
 
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
@@ -61,6 +64,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     lateinit var fragmentLayout: FrameLayout
 
     private var isExpanded = false
+
+    private lateinit var retrofit: Retrofit
+    private lateinit var api: RetrofitAPI
 
     companion object {
         const val GALLERY = 1
@@ -85,6 +91,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         category_lip.setOnClickListener(this)
         category_hair.setOnClickListener(this)
 
+        // Retrofit 초기화
+        retrofit = Retrofit.Builder()
+            .baseUrl(getString(R.string.baseUrl))
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        api = retrofit.create(RetrofitAPI::class.java)
 
         val anotherLayout = LayoutInflater.from(this).inflate(R.layout.fragment_skin, null)
 
@@ -113,6 +126,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 requestPermission1()
             }
         }
+
         // 갤러리 호출
         btnGallery.setOnClickListener {
             if(checkPermission2()){
@@ -125,14 +139,24 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
 
-        // 이미지 저장
+        // 이미지 저장 및 서버로 전송
         btnSave.setOnClickListener {
             val drawable = imgV.drawable
             if (drawable is BitmapDrawable) {
                 val bitmap = drawable.bitmap
-                val uri = saveFile(RandomFileName(), "image/jpeg", bitmap)
+                val uri = saveFile(RandomFileName(), "image/png", bitmap)
                 if (uri != null) {
                     Toast.makeText(this, "이미지가 갤러리에 저장되었습니다.", Toast.LENGTH_SHORT).show()
+
+                    // 이미지 바이트코드로 변환하고 Base64로 인코딩
+                    val base64String = convertImageViewToBase64()
+                    if (base64String != null) {
+                        // Base64 문자열을 사용하여 서버에 전송
+                        sendImageToServer(base64String)
+                    } else {
+                        Toast.makeText(this, "이미지를 변환할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
+
                 } else {
                     Toast.makeText(this, "이미지 저장에 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }
@@ -227,20 +251,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         super.onActivityResult(requestCode, resultCode, data)
 
         if(resultCode == Activity.RESULT_OK) {
-//            when(requestCode){
-//                CAMERA_CODE -> {
-//                    if(data?.extras?.get("data") != null){
-//                        val img = data?.extras?.get("data") as Bitmap
-//                        val uri = saveFile(RandomFileName(), "image/jpeg", img)
-//                        imgV.setImageURI(uri)
-//                    }
-//                }
-//                STORAGE_CODE -> {
-//                    val uri = data?.data
-//                    imgV.setImageURI(uri)
-//                }
-//            }
-
             if (requestCode == GALLERY) {
                 var ImageData: Uri? = data?.data
                 try {
@@ -277,7 +287,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
         val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         val takePictureIntent: Intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        val uri: Uri? = createImageUri("JPEG_${timeStamp}_", "image/jpeg")
+        val uri: Uri? = createImageUri("PNG_${timeStamp}_", "image/png")
         photoURI = uri
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
         startActivityForResult(takePictureIntent, REQUEST_CREATE_EX)
@@ -320,7 +330,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
             val fos = FileOutputStream(scriptor?.fileDescriptor)
 
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
             fos.close()
 
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
@@ -339,7 +349,105 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         return fileName
     }
 
+    // 이미지를 Base64 인코딩
+    fun convertImageViewToBase64(): String? {
+        val drawable = imgV.drawable as? BitmapDrawable
+        val bitmap = drawable?.bitmap
 
+        if (bitmap != null) {
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+            val byteArray = byteArrayOutputStream.toByteArray()
+            return Base64.encodeToString(byteArray, Base64.DEFAULT)
+        }
+        return null
+    }
+
+    fun decodeBase64ToImageView(base64String: String) {
+        val decodedString = Base64.decode(base64String, Base64.DEFAULT)
+        val decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+        imgV.setImageBitmap(decodedByte)
+    }
+
+    // 이미지를 서버로 전송하는 함수
+    fun sendImageToServer(base64Image: String) {
+        val jsonObject = JsonObject().apply {
+            addProperty("img", base64Image)
+            // 필요에 따라 추가 데이터 추가 가능
+        }
+
+        api.postImage(jsonObject).enqueue(object : Callback<JsonObject> {
+            override fun onResponse(call: retrofit2.Call<JsonObject>, response: Response<JsonObject>) {
+                if (response.isSuccessful) {
+                    val responseBody = response.body()
+                    if (responseBody != null) {
+                        // 서버로부터 받은 데이터를 처리
+                        val parsedImage = responseBody.get("parsedImage").asString
+                        Log.d("Retrofit", "Parsed Image: $parsedImage")
+                        // 추가 처리 (예: 메이크업 API 호출 등)
+                    }
+                } else {
+                    Log.e("Retrofit", "Error: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<JsonObject>, t: Throwable) {
+                Log.e("Retrofit", "Failed to send image", t)
+            }
+        })
+
+        // Hex 색상을 RGB로 변환하는 함수
+        fun parseColor(colorHex: String): List<Int> {
+            val color = android.graphics.Color.parseColor(colorHex)
+            return listOf(
+                android.graphics.Color.red(color),
+                android.graphics.Color.green(color),
+                android.graphics.Color.blue(color),
+                1
+            )
+        }
+
+        // 색상을 적용하고 메이크업 이미지를 가져오는 함수
+        fun applyMakeup(colorHex: String) {
+            val base64Image = convertImageViewToBase64()
+            if (base64Image != null) {
+                val color = parseColor(colorHex)
+                val jsonObject = JsonObject().apply {
+                    addProperty("img", base64Image)
+                    addProperty("parsing", "parsingImg")
+                    add("skin_color", JsonObject().apply {
+                        addProperty("R", color[0])
+                        addProperty("G", color[1])
+                        addProperty("B", color[2])
+                        addProperty("alpha", 1)
+                    })
+                    // 필요에 따라 hair_color와 lip_color도 추가 가능
+                }
+
+                api.postMakeup(jsonObject).enqueue(object : Callback<JsonObject> {
+                    override fun onResponse(call: retrofit2.Call<JsonObject>, response: Response<JsonObject>) {
+                        if (response.isSuccessful) {
+                            val responseBody = response.body()
+                            if (responseBody != null) {
+                                val changeFaceImg = responseBody.get("changeFaceImg").asString
+                                val decodedString = Base64.decode(changeFaceImg, Base64.DEFAULT)
+                                val decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+                                imgV.setImageBitmap(decodedByte)
+                            }
+                        } else {
+                            Log.e("Retrofit", "Error: ${response.code()}")
+                        }
+                    }
+
+                    override fun onFailure(call: retrofit2.Call<JsonObject>, t: Throwable) {
+                        Log.e("Retrofit", "Failed to apply makeup", t)
+                    }
+                })
+            } else {
+                Toast.makeText(this, "이미지를 변환할 수 없습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 }
 
 
