@@ -131,6 +131,7 @@ class HairFragment : Fragment() {
         mCallHairItemInfo.enqueue(mRetrofitCallback) // 응답을 큐에 넣어 대기시킴
     }
 
+    //항목과 색상 정보를 화면에 표시하는 함수
     private fun showItemInfo(rowIndex: Int, colorIndex: Int) {
         if (rowIndex < dataList.size && colorIndex < dataList[rowIndex].Color.size) {
             val item = dataList[rowIndex]
@@ -139,6 +140,7 @@ class HairFragment : Fragment() {
             val stringBuilder = StringBuilder()
             stringBuilder.append("${item.itemName}\t\t\t $colorName \n ${item.Link}")
 
+            // 항목의 이름, 색상 이름, 링크 정보를 textViewContent에 설정하여 표시
             textViewContent.text = stringBuilder.toString()
             itemLink = item.Link
         } else {

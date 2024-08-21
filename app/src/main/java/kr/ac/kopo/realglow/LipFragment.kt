@@ -1,6 +1,7 @@
 package kr.ac.kopo.realglow
 
 import android.content.Intent
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -8,8 +9,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TabHost
 import android.widget.TextView
+import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import retrofit2.Call
@@ -25,6 +28,7 @@ class LipFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
     lateinit var textViewContent: TextView
+    lateinit var imgV: ImageView
 
     lateinit var mRetrofit: Retrofit
     lateinit var mRetrofitAPI: RetrofitAPI
@@ -50,6 +54,8 @@ class LipFragment : Fragment() {
 
         textViewContent = activity?.findViewById(R.id.textViewContent)
             ?: throw IllegalStateException("TextView not found")
+        imgV = activity?.findViewById(R.id.imgV)
+            ?: throw IllegalStateException("ImageView not found")
 
         // TabHost 초기화
         val tabHost = view.findViewById<TabHost>(R.id.tabHost)
@@ -79,18 +85,23 @@ class LipFragment : Fragment() {
         val lipColor2_2 = view.findViewById<View>(R.id.lipColor2_2)
 
         // 버튼 클릭 리스너 설정
-        lipColor1_1.setOnClickListener {
-            showItemInfo(0, 0)
+        val clickListener = View.OnClickListener { v ->
+            if (imgV.drawable != null && imgV.drawable is BitmapDrawable) {
+                when (v.id) {
+                    R.id.hairColor1_1 -> showItemInfo(0, 0)
+                    R.id.hairColor1_2 -> showItemInfo(0, 1)
+                    R.id.hairColor2_1 -> showItemInfo(1, 0)
+                    R.id.hairColor2_2 -> showItemInfo(1, 1)
+                }
+            } else {
+                Toast.makeText(activity, "이미지를 먼저 선택해주세요.", Toast.LENGTH_SHORT).show()
+            }
         }
-        lipColor1_2.setOnClickListener {
-            showItemInfo(0, 1)
-        }
-        lipColor2_1.setOnClickListener {
-            showItemInfo(1, 0)
-        }
-        lipColor2_2.setOnClickListener {
-            showItemInfo(1, 1)
-        }
+
+        lipColor1_1.setOnClickListener(clickListener)
+        lipColor1_2.setOnClickListener(clickListener)
+        lipColor2_1.setOnClickListener(clickListener)
+        lipColor2_2.setOnClickListener(clickListener)
 
         textViewContent.setOnClickListener {
             itemLink?.let {

@@ -1,6 +1,7 @@
 package kr.ac.kopo.realglow
 
 import android.content.Intent
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -8,8 +9,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TabHost
 import android.widget.TextView
+import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import retrofit2.Call
@@ -25,6 +28,7 @@ class SkinFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
     lateinit var textViewContent: TextView
+    lateinit var imgV: ImageView
 
     lateinit var mRetrofit: Retrofit
     lateinit var mRetrofitAPI: RetrofitAPI
@@ -33,12 +37,6 @@ class SkinFragment : Fragment() {
     private var itemLink: String? = null
     private var dataList: List<RetrofitDTO.skinText.Row> = listOf()
 
-    private var listener: SkinFragmentListener? = null
-
-    interface SkinFragmentListener {
-        fun applyMakeup(skinColor: List<Int>)
-        fun applyColorToBitmap(colorHex: String)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +55,8 @@ class SkinFragment : Fragment() {
 
         textViewContent = activity?.findViewById(R.id.textViewContent)
             ?: throw IllegalStateException("TextView not found")
+        imgV = activity?.findViewById(R.id.imgV)
+            ?: throw IllegalStateException("ImageView not found")
 
         // TabHost 초기화
         val tabHost = view.findViewById<TabHost>(R.id.tabHost)
@@ -86,18 +86,23 @@ class SkinFragment : Fragment() {
         val skinColor2_2 = view.findViewById<View>(R.id.skinColor2_2)
 
         // 버튼 클릭 리스너 설정
-        skinColor1_1.setOnClickListener {
-            showItemInfo(0, 0)
+        val clickListener = View.OnClickListener { v ->
+            if (imgV.drawable != null && imgV.drawable is BitmapDrawable) {
+                when (v.id) {
+                    R.id.skinColor1_1 -> showItemInfo(0, 0)
+                    R.id.skinColor1_2 -> showItemInfo(0, 1)
+                    R.id.skinColor2_1 -> showItemInfo(1, 0)
+                    R.id.skinColor2_2 -> showItemInfo(1, 1)
+                }
+            } else {
+                Toast.makeText(activity, "이미지를 먼저 선택해주세요.", Toast.LENGTH_SHORT).show()
+            }
         }
-        skinColor1_2.setOnClickListener {
-            showItemInfo(0, 1)
-        }
-        skinColor2_1.setOnClickListener {
-            showItemInfo(1, 0)
-        }
-        skinColor2_2.setOnClickListener {
-            showItemInfo(1, 1)
-        }
+
+        skinColor1_1.setOnClickListener(clickListener)
+        skinColor1_2.setOnClickListener(clickListener)
+        skinColor2_1.setOnClickListener(clickListener)
+        skinColor2_2.setOnClickListener(clickListener)
 
         textViewContent.setOnClickListener {
             itemLink?.let {
@@ -127,45 +132,22 @@ class SkinFragment : Fragment() {
         mCallSkinItemInfo.enqueue(mRetrofitCallback) // 응답을 큐에 넣어 대기시킴
     }
 
-    private fun applySkinColor(rowIndex: Int, colorIndex: Int) {
-        if (rowIndex < dataList.size && colorIndex < dataList[rowIndex].Color.size) {
-            val item = dataList[rowIndex]
-            val colorHex = item.Color[colorIndex]
-            val color = parseColor(colorHex)
-
-            listener?.applyMakeup(color)
-
-            showItemInfo(rowIndex, colorIndex)
-        } else {
-            textViewContent.text = "No data available"
-        }
-    }
-
-    private fun parseColor(colorHex: String): List<Int> {
-        val color = android.graphics.Color.parseColor(colorHex)
-        return listOf(
-            android.graphics.Color.red(color),
-            android.graphics.Color.green(color),
-            android.graphics.Color.blue(color),
-            1 // alpha 값
-        )
-    }
-
+    //항목과 색상 정보를 화면에 표시하는 함수
     private fun showItemInfo(rowIndex: Int, colorIndex: Int) {
         if (rowIndex < dataList.size && colorIndex < dataList[rowIndex].Color.size) {
             val item = dataList[rowIndex]
             val color = item.Color[colorIndex]
             val colorName = item.ColorName[colorIndex]
             val stringBuilder = StringBuilder()
-            stringBuilder.append("Item Name: ${item.itemName}\t\t\t $colorName \n ${item.Link}")
+            stringBuilder.append("${item.itemName}\t\t\t $colorName \n ${item.Link}")
 
+            // 항목의 이름, 색상 이름, 링크 정보를 textViewContent에 설정하여 표시
             textViewContent.text = stringBuilder.toString()
             itemLink = item.Link
         } else {
             textViewContent.text = "No data available"
         }
     }
-
 
     private val mRetrofitCallback = object : retrofit2.Callback<JsonObject> {
         override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
