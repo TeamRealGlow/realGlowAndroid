@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TabHost
 import android.widget.TextView
@@ -36,6 +37,7 @@ class HairFragment : Fragment() {
 
     private var itemLink: String? = null
     private var dataList: List<RetrofitDTO.hairText.Row> = listOf()
+    private var selectedView: View? = null // 이전에 선택된 뷰를 추적
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,17 +88,29 @@ class HairFragment : Fragment() {
 
         // 버튼 클릭 리스너 설정
         val clickListener = View.OnClickListener { v ->
-            if (imgV.drawable != null && imgV.drawable is BitmapDrawable) {
-                when (v.id) {
-                    R.id.hairColor1_1 -> showItemInfo(0, 0)
-                    R.id.hairColor1_2 -> showItemInfo(0, 1)
-                    R.id.hairColor2_1 -> showItemInfo(1, 0)
-                    R.id.hairColor2_2 -> showItemInfo(1, 1)
-                }
-            } else {
-                Toast.makeText(activity, "이미지를 먼저 선택해주세요.", Toast.LENGTH_SHORT).show()
+            // 이전에 선택된 뷰의 선택 상태 해제
+            selectedView?.isSelected = false
+
+            // 클릭된 뷰를 선택 상태로 설정
+            v.isSelected = true
+
+            // 선택된 뷰 참조를 업데이트
+            selectedView = v
+
+            // 디버깅 로그 추가
+            Log.d("HairFragment", "View ${v.id} selected: ${v.isSelected}")
+
+            when (v.id) {
+                R.id.hairColor1_1 -> showItemInfo(0, 0)
+                R.id.hairColor1_2 -> showItemInfo(0, 1)
+                R.id.hairColor2_1 -> showItemInfo(1, 0)
+                R.id.hairColor2_2 -> showItemInfo(1, 1)
+                // 추가적인 케이스가 필요한 경우 여기에 추가
             }
         }
+
+
+
 
         hairColor1_1.setOnClickListener(clickListener)
         hairColor1_2.setOnClickListener(clickListener)
@@ -114,6 +128,7 @@ class HairFragment : Fragment() {
 
         return view
     }
+
 
     private fun setRetrofit() {
         // 레트로핏으로 가져올 url 설정하고 세팅
@@ -147,6 +162,7 @@ class HairFragment : Fragment() {
             textViewContent.text = "No data available"
         }
     }
+
 
 
     private val mRetrofitCallback = object : retrofit2.Callback<JsonObject> {

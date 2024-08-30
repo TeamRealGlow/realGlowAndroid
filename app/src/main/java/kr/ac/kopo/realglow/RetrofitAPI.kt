@@ -16,4 +16,7 @@ interface RetrofitAPI {
 
     @POST("/makeup")
     fun postMakeup(@Body requestBody: JsonObject): Call<JsonObject>
+
+
+
 }

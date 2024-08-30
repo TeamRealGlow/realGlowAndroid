@@ -88,10 +88,10 @@ class LipFragment : Fragment() {
         val clickListener = View.OnClickListener { v ->
             if (imgV.drawable != null && imgV.drawable is BitmapDrawable) {
                 when (v.id) {
-                    R.id.hairColor1_1 -> showItemInfo(0, 0)
-                    R.id.hairColor1_2 -> showItemInfo(0, 1)
-                    R.id.hairColor2_1 -> showItemInfo(1, 0)
-                    R.id.hairColor2_2 -> showItemInfo(1, 1)
+                    R.id.lipColor1_1 -> showItemInfo(0, 0)
+                    R.id.lipColor1_2 -> showItemInfo(0, 1)
+                    R.id.lipColor2_1 -> showItemInfo(1, 0)
+                    R.id.lipColor2_2 -> showItemInfo(1, 1)
                 }
             } else {
                 Toast.makeText(activity, "이미지를 먼저 선택해주세요.", Toast.LENGTH_SHORT).show()

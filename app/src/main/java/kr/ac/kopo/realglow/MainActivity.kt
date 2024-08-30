@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Camera
 import android.graphics.ImageDecoder
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
@@ -14,13 +13,10 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import android.telecom.Call
-import android.telecom.CallEndpoint
+import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.SurfaceView
 import android.view.View
-import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -29,24 +25,19 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
-import com.google.gson.Gson
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
-import kotlin.random.Random
-import android.util.Base64
-import retrofit2.Callback
-import java.io.ByteArrayOutputStream
-
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
     val CAMERA_CODE = 98
@@ -101,7 +92,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         val anotherLayout = LayoutInflater.from(this).inflate(R.layout.fragment_skin, null)
 
-
         //    더보기
         val textViewContent = findViewById<TextView>(R.id.textViewContent)
         val textExpand = findViewById<TextView>(R.id.textExpand)
@@ -118,23 +108,21 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
 
         // 사진 촬영
-        btnCapture.setOnClickListener{
-            if(checkPermission1()){
+        btnCapture.setOnClickListener {
+            if (checkPermission1()) {
                 dispatchTakePictureIntentEx()
-            }
-            else{
+            } else {
                 requestPermission1()
             }
         }
 
         // 갤러리 호출
         btnGallery.setOnClickListener {
-            if(checkPermission2()){
+            if (checkPermission2()) {
                 val intent: Intent = Intent(Intent.ACTION_GET_CONTENT)
                 intent.setType("image/*")
                 startActivityForResult(intent, GALLERY)
-            }
-            else{
+            } else {
                 requestPermission2()
             }
         }
@@ -156,7 +144,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     } else {
                         Toast.makeText(this, "이미지를 변환할 수 없습니다.", Toast.LENGTH_SHORT).show()
                     }
-
                 } else {
                     Toast.makeText(this, "이미지 저장에 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }
@@ -165,9 +152,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
     }
-
-
-
 
     override fun onClick(v: View) {
         when (v.id) {
@@ -192,52 +176,44 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     // 카메라 촬영 권한 요청
-    private fun requestPermission1(){
+    private fun requestPermission1() {
         ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.CAMERA), 1)
-
     }
 
     // 갤러리 열기 권한 요청
-    private fun requestPermission2(){
+    private fun requestPermission2() {
         ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 1)
-
     }
 
-
     // 카메라 촬영 권한 여부 확인
-    private fun checkPermission1():Boolean{
-
+    private fun checkPermission1(): Boolean {
         return (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this,
             android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
-
     }
 
     // 갤러리 열기 권한 여부 확인
-    private fun checkPermission2():Boolean{
-
+    private fun checkPermission2(): Boolean {
         return (ContextCompat.checkSelfPermission(this,
             android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
-
     }
 
-    // 카메라 권한, 저장소 권한
-    // 요청 권한
+    // 카메라 권한, 저장소 권한 요청 처리
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        when(requestCode){
+        when (requestCode) {
             CAMERA_CODE -> {
-                for (grant in grantResults){
-                    if(grant != PackageManager.PERMISSION_GRANTED){
+                for (grant in grantResults) {
+                    if (grant != PackageManager.PERMISSION_GRANTED) {
                         Toast.makeText(this, "카메라 권한을 승인해 주세요", Toast.LENGTH_LONG).show()
                     }
                 }
             }
             GALLERY -> {
-                for(grant in grantResults){
-                    if(grant != PackageManager.PERMISSION_GRANTED){
+                for (grant in grantResults) {
+                    if (grant != PackageManager.PERMISSION_GRANTED) {
                         Toast.makeText(this, "저장소 권한을 승인해 주세요", Toast.LENGTH_LONG).show()
                     }
                 }
@@ -246,11 +222,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     // 촬영한 사진, 갤러리에서 선택한 이미지를 이미지뷰에 연결
-    @Override
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if(resultCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK) {
             if (requestCode == GALLERY) {
                 var ImageData: Uri? = data?.data
                 try {
@@ -259,11 +234,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-            } else if( requestCode == REQUEST_IMAGE_CAPTURE) {
-                val imageBitmap :Bitmap? = data?.extras?.get("data") as Bitmap
+            } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                val imageBitmap: Bitmap? = data?.extras?.get("data") as Bitmap
                 imgV.setImageBitmap(imageBitmap)
-            } else if( requestCode == REQUEST_CREATE_EX) {
-                if( photoURI != null) {
+            } else if (requestCode == REQUEST_CREATE_EX) {
+                if (photoURI != null) {
                     val bitmap = loadBitmapFromMediaStoreBy(photoURI!!)
                     imgV.setImageBitmap(bitmap)
                     photoURI = null
@@ -273,15 +248,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     // 카메라 원본 이미지를 저장하기 위한 이미지 경로 Uri 생성
-    fun createImageUri(filename: String, mimeType: String):Uri? {
+    fun createImageUri(filename: String, mimeType: String): Uri? {
         var values = ContentValues()
-        values.put(MediaStore.Images.Media.DISPLAY_NAME,filename)
-        values.put(MediaStore.Images.Media.MIME_TYPE,mimeType)
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+        values.put(MediaStore.Images.Media.MIME_TYPE, mimeType)
         return contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
     }
 
     // 카메라를 동작하기 위한 함수
-    private var photoURI : Uri? = null
+    private var photoURI: Uri? = null
     private val REQUEST_CREATE_EX = 3
     private fun dispatchTakePictureIntentEx() {
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
@@ -294,24 +269,24 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     // 생성된 Uri 경로에 이미지를 MediaStore를 사용해서 읽어옴.
-    fun loadBitmapFromMediaStoreBy(photoUri: Uri) : Bitmap?{
+    fun loadBitmapFromMediaStoreBy(photoUri: Uri): Bitmap? {
         var image: Bitmap? = null
         try {
-            image = if(Build.VERSION.SDK_INT > 27) {
+            image = if (Build.VERSION.SDK_INT > 27) {
                 val source: ImageDecoder.Source =
                     ImageDecoder.createSource(this.contentResolver, photoUri)
                 ImageDecoder.decodeBitmap(source)
             } else {
                 MediaStore.Images.Media.getBitmap(this.contentResolver, photoUri)
             }
-        } catch(e:IOException) {
+        } catch (e: IOException) {
             e.printStackTrace()
         }
         return image
     }
 
     // 사진 저장
-    fun saveFile(fileName:String, mimeType:String, bitmap: Bitmap):Uri?{
+    fun saveFile(fileName: String, mimeType: String, bitmap: Bitmap): Uri? {
         var CV = ContentValues()
 
         // MediaStore 에 파일명, mimeType 을 지정
@@ -319,13 +294,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         CV.put(MediaStore.Images.Media.MIME_TYPE, mimeType)
 
         // 안정성 검사
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             CV.put(MediaStore.Images.Media.IS_PENDING, 1)
         }
 
         // MediaStore 에 파일을 저장
         val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, CV)
-        if(uri != null) {
+        if (uri != null) {
             var scriptor = contentResolver.openFileDescriptor(uri, "w")
 
             val fos = FileOutputStream(scriptor?.fileDescriptor)
@@ -333,7 +308,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
             fos.close()
 
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 CV.clear()
                 // IS_PENDING 을 초기화
                 CV.put(MediaStore.Images.Media.IS_PENDING, 0)
@@ -344,7 +319,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     // 파일명을 날짜로 해서 저장
-    fun RandomFileName() : String {
+    fun RandomFileName(): String {
         val fileName = SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis())
         return fileName
     }
@@ -363,91 +338,113 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         return null
     }
 
+    // Base64 문자열을 디코딩하여 ImageView에 표시하는 함수
     fun decodeBase64ToImageView(base64String: String) {
-        val decodedString = Base64.decode(base64String, Base64.DEFAULT)
-        val decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
-        imgV.setImageBitmap(decodedByte)
+        if (base64String.isNotEmpty()) {
+            val decodedBytes = Base64.decode(base64String, Base64.DEFAULT)
+            val decodedBitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+            imgV.setImageBitmap(decodedBitmap)
+            Log.d("Retrofit", "Image successfully decoded and set to ImageView")
+        } else {
+            Log.e("Retrofit", "Received an empty base64 string")
+        }
     }
 
     // 이미지를 서버로 전송하는 함수
     fun sendImageToServer(base64Image: String) {
         val jsonObject = JsonObject().apply {
             addProperty("img", base64Image)
-            // 필요에 따라 추가 데이터 추가 가능
         }
 
         api.postImage(jsonObject).enqueue(object : Callback<JsonObject> {
-            override fun onResponse(call: retrofit2.Call<JsonObject>, response: Response<JsonObject>) {
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                 if (response.isSuccessful) {
                     val responseBody = response.body()
                     if (responseBody != null) {
-                        // 서버로부터 받은 데이터를 처리
-                        val parsedImage = responseBody.get("parsedImage").asString
+                        val parsedImage = responseBody.get("PNGImage").asString
                         Log.d("Retrofit", "Parsed Image: $parsedImage")
-                        // 추가 처리 (예: 메이크업 API 호출 등)
+                        applyMakeup(parsedImage)
                     }
                 } else {
-                    Log.e("Retrofit", "Error: ${response.code()}")
+                    Log.e("Retrofit", "Error: ${response.code()} - ${response.message()}")
                 }
             }
 
-            override fun onFailure(call: retrofit2.Call<JsonObject>, t: Throwable) {
-                Log.e("Retrofit", "Failed to send image", t)
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                Log.e("Retrofit", "Failed to send image: ${t.message}")
             }
         })
+    }
 
-        // Hex 색상을 RGB로 변환하는 함수
-        fun parseColor(colorHex: String): List<Int> {
-            val color = android.graphics.Color.parseColor(colorHex)
-            return listOf(
-                android.graphics.Color.red(color),
-                android.graphics.Color.green(color),
-                android.graphics.Color.blue(color),
-                1
-            )
-        }
-
-        // 색상을 적용하고 메이크업 이미지를 가져오는 함수
-        fun applyMakeup(colorHex: String) {
-            val base64Image = convertImageViewToBase64()
-            if (base64Image != null) {
-                val color = parseColor(colorHex)
-                val jsonObject = JsonObject().apply {
-                    addProperty("img", base64Image)
-                    addProperty("parsing", "parsingImg")
-                    add("skin_color", JsonObject().apply {
-                        addProperty("R", color[0])
-                        addProperty("G", color[1])
-                        addProperty("B", color[2])
-                        addProperty("alpha", 1)
+    // 메이크업 색상을 적용하고 이미지를 서버로 전송하는 함수
+    fun applyMakeup(parsedImage: String) {
+        val base64Image = convertImageViewToBase64()
+        if (base64Image != null) {
+            val color = parseColor("#FF5733") // 예시 색상, 실제 색상 값으로 변경 가능
+            val jsonObject = JsonObject().apply {
+                addProperty("img", base64Image)
+                addProperty("parsing", parsedImage)
+                add("skin_color", JsonArray().apply {
+                    add(JsonArray().apply {
+                        add(color[0])
+                        add(color[1])
+                        add(color[2])
                     })
-                    // 필요에 따라 hair_color와 lip_color도 추가 가능
+                    add(1) // alpha 값을 추가
+                })
+                add("hair_color", JsonArray().apply {
+                    add(JsonArray().apply {
+                        add(color[0])
+                        add(color[1])
+                        add(color[2])
+                    })
+                    add(1) // alpha 값을 추가
+                })
+                add("lip_color", JsonArray().apply {
+                    add(JsonArray().apply {
+                        add(color[0])
+                        add(color[1])
+                        add(color[2])
+                    })
+                    add(1) // alpha 값을 추가
+                })
+            }
+
+
+            Log.d("Retrofit", "Makeup Request: $jsonObject")
+
+            api.postMakeup(jsonObject).enqueue(object : Callback<JsonObject> {
+                override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                    if (response.isSuccessful) {
+                        val responseBody = response.body()
+                        if (responseBody != null) {
+                            val changeFaceImg = responseBody.get("changeImg").asString
+                            Log.d("Retrofit", "Makeup Applied Image: $changeFaceImg")
+                            decodeBase64ToImageView(changeFaceImg)
+                        }
+                    } else {
+                        Log.e("Retrofit", "Error: ${response.code()} - ${response.message()}")
+                    }
                 }
 
-                api.postMakeup(jsonObject).enqueue(object : Callback<JsonObject> {
-                    override fun onResponse(call: retrofit2.Call<JsonObject>, response: Response<JsonObject>) {
-                        if (response.isSuccessful) {
-                            val responseBody = response.body()
-                            if (responseBody != null) {
-                                val changeFaceImg = responseBody.get("changeFaceImg").asString
-                                val decodedString = Base64.decode(changeFaceImg, Base64.DEFAULT)
-                                val decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
-                                imgV.setImageBitmap(decodedByte)
-                            }
-                        } else {
-                            Log.e("Retrofit", "Error: ${response.code()}")
-                        }
-                    }
-
-                    override fun onFailure(call: retrofit2.Call<JsonObject>, t: Throwable) {
-                        Log.e("Retrofit", "Failed to apply makeup", t)
-                    }
-                })
-            } else {
-                Toast.makeText(this, "이미지를 변환할 수 없습니다.", Toast.LENGTH_SHORT).show()
-            }
+                override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                    Log.e("Retrofit", "Failed to apply makeup: ${t.message}")
+                }
+            })
+        } else {
+            Toast.makeText(this, "이미지를 변환할 수 없습니다.", Toast.LENGTH_SHORT).show()
         }
     }
+
+    // Hex 색상을 RGB로 변환하는 함수
+    fun parseColor(colorHex: String): List<Int> {
+        val color = android.graphics.Color.parseColor(colorHex)
+        Log.d("Retrofit", "Parsed Color: R=${android.graphics.Color.red(color)}, G=${android.graphics.Color.green(color)}, B=${android.graphics.Color.blue(color)}")
+        return listOf(
+            android.graphics.Color.red(color),
+            android.graphics.Color.green(color),
+            android.graphics.Color.blue(color),
+            1
+        )
+    }
 }
-
-

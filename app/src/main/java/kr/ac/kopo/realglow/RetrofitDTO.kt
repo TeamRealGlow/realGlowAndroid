@@ -2,6 +2,8 @@ package kr.ac.kopo.realglow
 
 import android.icu.text.SelectFormat
 
+
+
 class RetrofitDTO {
     data class hairText
         (
