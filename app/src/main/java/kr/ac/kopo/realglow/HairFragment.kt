@@ -1,69 +1,61 @@
 package kr.ac.kopo.realglow
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.util.Base64
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TabHost
 import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+import java.io.ByteArrayOutputStream
 
 class HairFragment : Fragment() {
-    val TAG = "TAG_MainActivity" // 로그 분류 태그
-    private var param1: String? = null
-    private var param2: String? = null
-    lateinit var textViewContent: TextView
-    lateinit var imgV: ImageView
-
-    lateinit var mRetrofit: Retrofit
-    lateinit var mRetrofitAPI: RetrofitAPI
-    lateinit var mCallHairItemInfo: retrofit2.Call<JsonObject>
-
-    private var itemLink: String? = null
+    private lateinit var imgV: ImageView
+    private lateinit var api: RetrofitAPI
+    private lateinit var textViewContent: TextView
     private var dataList: List<RetrofitDTO.hairText.Row> = listOf()
-    private var selectedView: View? = null // 이전에 선택된 뷰를 추적
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private var selectedView: View? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_hair, container, false)
+        imgV = activity?.findViewById(R.id.imgV) ?: throw IllegalStateException("ImageView not found")
+        textViewContent = (activity as MainActivity).findViewById(R.id.textViewContent)
 
-        textViewContent = activity?.findViewById(R.id.textViewContent)
-            ?: throw IllegalStateException("TextView not found")
-        imgV = activity?.findViewById(R.id.imgV)
-            ?: throw IllegalStateException("ImageView not found")
+        val retrofit = (activity as MainActivity).retrofit
+        api = retrofit.create(RetrofitAPI::class.java)
 
-        // TabHost 초기화
+        setupTabs(view)
+        callLoadItem("hair")  // 서버로부터 데이터를 로드합니다.
+
+        return view
+    }
+
+    private fun setupTabs(view: View) {
         val tabHost = view.findViewById<TabHost>(R.id.tabHost)
         tabHost.setup()
 
-        // Tab 설정
         var spec = tabHost.newTabSpec("Tab 1")
         spec.setContent(R.id.tabproduct1)
         spec.setIndicator("제품명1")
@@ -79,118 +71,233 @@ class HairFragment : Fragment() {
         spec.setIndicator("제품명3")
         tabHost.addTab(spec)
 
-        setRetrofit() // 레트로핏 세팅
-
-        val hairColor1_1 = view.findViewById<View>(R.id.hairColor1_1)
-        val hairColor1_2 = view.findViewById<View>(R.id.hairColor1_2)
-        val hairColor2_1 = view.findViewById<View>(R.id.hairColor2_1)
-        val hairColor2_2 = view.findViewById<View>(R.id.hairColor2_2)
-
-        // 버튼 클릭 리스너 설정
-        val clickListener = View.OnClickListener { v ->
-            // 이전에 선택된 뷰의 선택 상태 해제
-            selectedView?.isSelected = false
-
-            // 클릭된 뷰를 선택 상태로 설정
-            v.isSelected = true
-
-            // 선택된 뷰 참조를 업데이트
-            selectedView = v
-
-            // 디버깅 로그 추가
-            Log.d("HairFragment", "View ${v.id} selected: ${v.isSelected}")
-
-            when (v.id) {
-                R.id.hairColor1_1 -> showItemInfo(0, 0)
-                R.id.hairColor1_2 -> showItemInfo(0, 1)
-                R.id.hairColor2_1 -> showItemInfo(1, 0)
-                R.id.hairColor2_2 -> showItemInfo(1, 1)
-                // 추가적인 케이스가 필요한 경우 여기에 추가
-            }
+        view.findViewById<View>(R.id.hair_none1).setOnClickListener {
+            handleHairColorClick(it, -1, -1)
         }
-
-
-
-
-        hairColor1_1.setOnClickListener(clickListener)
-        hairColor1_2.setOnClickListener(clickListener)
-        hairColor2_1.setOnClickListener(clickListener)
-        hairColor2_2.setOnClickListener(clickListener)
-
-        textViewContent.setOnClickListener {
-            itemLink?.let {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
-                startActivity(intent)
-            }
+        view.findViewById<View>(R.id.hair_none2).setOnClickListener {
+            handleHairColorClick(it, -1, -1)
         }
-
-        callLoadItem("hair") // 데이터를 로드하는 함수 호출
-
-        return view
+        view.findViewById<View>(R.id.hair_none3).setOnClickListener {
+            handleHairColorClick(it, -1, -1)
+        }
+        view.findViewById<View>(R.id.hairColor1_1).setOnClickListener {
+            handleHairColorClick(it, 0, 0)
+        }
+        view.findViewById<View>(R.id.hairColor1_2).setOnClickListener {
+            handleHairColorClick(it, 0, 1)
+        }
+        view.findViewById<View>(R.id.hairColor2_1).setOnClickListener {
+            handleHairColorClick(it, 1, 0)
+        }
+        view.findViewById<View>(R.id.hairColor2_2).setOnClickListener {
+            handleHairColorClick(it, 1, 1)
+        }
+        view.findViewById<View>(R.id.hairColor3_1).setOnClickListener {
+            handleHairColorClick(it, 2, 0)
+        }
+        view.findViewById<View>(R.id.hairColor3_2).setOnClickListener {
+            handleHairColorClick(it, 2, 1)
+        }
     }
 
+    private fun handleHairColorClick(view: View?, rowIndex: Int, colorIndex: Int) {
+        val activity = activity as MainActivity
+        val base64Image = activity.getOriginalBase64Image()
 
-    private fun setRetrofit() {
-        // 레트로핏으로 가져올 url 설정하고 세팅
-        mRetrofit = Retrofit.Builder()
-            .baseUrl(getString(R.string.baseUrl))
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+        if (base64Image != null) {
+            if (view != null) {
+                selectView(view)
+            }
+            if (rowIndex == -1 && colorIndex == -1) {
+                activity.setHairColor(listOf(255, 255, 255, -11))
+                // 더보기란에서 헤어 관련 정보 삭제
+                activity.selectedInfoList.removeIf { it.startsWith("Hair") }
+                updateTextViewContent()  // 더보기란 갱신
+                Toast.makeText(activity, "헤어 색상이 초기화되었습니다.", Toast.LENGTH_SHORT).show()
+            } else {
+                // 새로운 색상을 선택한 경우
+                val currentColor = dataList[rowIndex].Color[colorIndex]
+                showItemInfo(rowIndex, colorIndex, "Hair")
+                activity.setHairColor(parseColor(currentColor))
+            }
 
-        // 인터페이스로 만든 레트로핏 api 요청 받는 것 변수로 등록
-        mRetrofitAPI = mRetrofit.create(RetrofitAPI::class.java)
-    }
+            // Parsing 작업 진행
+            val parsingRequest = RetrofitDTO.ParsingRequest(
+                img = base64Image,
+                category = "hair",
+                color = activity.makeupColorInfo.hairColor ?: listOf(255, 255, 255, -11)
+            )
 
-    private fun callLoadItem(hairItem: String) {
-        mCallHairItemInfo = mRetrofitAPI.getLoadItem(hairItem) // RetrofitAPI에서 JSON 객체를 요청해서 반환하는 메소드 호출
-        mCallHairItemInfo.enqueue(mRetrofitCallback) // 응답을 큐에 넣어 대기시킴
-    }
+            api.postImage(parsingRequest).enqueue(object : Callback<RetrofitDTO.ParsingResponse> {
+                override fun onResponse(call: Call<RetrofitDTO.ParsingResponse>, response: Response<RetrofitDTO.ParsingResponse>) {
+                    if (response.isSuccessful) {
+                        val responseBody = response.body()
+                        if (responseBody != null) {
+                            // 기존 applyMakeup 함수 호출
+                            applyMakeup(base64Image, responseBody.PNGImage, activity.makeupColorInfo.hairColor ?: listOf(255, 255, 255, -11))
+                        } else {
+                            Log.e("Retrofit", "Failed to receive parsing response")
+                        }
+                    }
+                }
 
-    //항목과 색상 정보를 화면에 표시하는 함수
-    private fun showItemInfo(rowIndex: Int, colorIndex: Int) {
-        if (rowIndex < dataList.size && colorIndex < dataList[rowIndex].Color.size) {
-            val item = dataList[rowIndex]
-            val color = item.Color[colorIndex]
-            val colorName = item.ColorName[colorIndex]
-            val stringBuilder = StringBuilder()
-            stringBuilder.append("${item.itemName}\t\t\t $colorName \n ${item.Link}")
-
-            // 항목의 이름, 색상 이름, 링크 정보를 textViewContent에 설정하여 표시
-            textViewContent.text = stringBuilder.toString()
-            itemLink = item.Link
+                override fun onFailure(call: Call<RetrofitDTO.ParsingResponse>, t: Throwable) {
+                    Log.e("Retrofit", "Failed to parse image: ${t.message}")
+                }
+            })
         } else {
-            textViewContent.text = "No data available"
+            Toast.makeText(activity, "원본 이미지를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
+    private fun selectView(view: View) {
+        // 이전에 선택된 뷰가 있다면 선택 상태 해제
+        selectedView?.foreground = null
 
-
-    private val mRetrofitCallback = object : retrofit2.Callback<JsonObject> {
-        override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
-            // 서버에서 데이터 요청 성공 시
-            val result = response.body()
-            Log.d("testt", "결과는 $result")
-            val gson = Gson()
-            val dataParsed1 = gson.fromJson(result, RetrofitDTO.hairText::class.java)
-
-            dataList = dataParsed1.row
+        // 현재 선택된 뷰에 선택 상태 표시 (ImageView와 일반 View 모두 처리)
+        if (view is ImageView) {
+            // ImageView의 경우 선택된 상태를 배경색이나 테두리로 표시
+            view.foreground = resources.getDrawable(R.drawable.selected_border, null)
+        } else {
+            // 다른 View의 경우에도 동일하게 foreground로 표시
+            view.foreground = resources.getDrawable(R.drawable.selected_border, null)
         }
 
-        override fun onFailure(call: Call<JsonObject>, t: Throwable) {
-            // 서버 요청 실패
-            t.printStackTrace()
-            Log.d("testt", "에러입니다. ${t.message}")
-        }
+        // 선택된 뷰를 업데이트
+        selectedView = view
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            HairFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    private fun callLoadItem(itemType: String) {
+        api.getLoadItem(itemType).enqueue(object : Callback<JsonObject> {
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                if (response.isSuccessful) {
+                    val result = response.body()
+                    val gson = Gson()
+                    val dataParsed = gson.fromJson(result, RetrofitDTO.hairText::class.java)
+                    dataList = dataParsed.row
+                } else {
+                    Log.e("Retrofit", "Error: ${response.code()} - ${response.message()}")
                 }
             }
+
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                Log.e("Retrofit", "Failed to load items: ${t.message}")
+            }
+        })
+    }
+
+    private fun showItemInfo(rowIndex: Int, colorIndex: Int, category: String) {
+        if (rowIndex < dataList.size && colorIndex < dataList[rowIndex].Color.size) {
+            val item = dataList[rowIndex]
+            val colorName = item.ColorName[colorIndex]
+            val itemName = item.itemName
+            val link = item.Link  // 서버에서 가져온 링크
+
+            val activity = activity as MainActivity
+            // 새로운 정보로 업데이트
+            val itemInfoWithLink = "$category - [$itemName] $colorName - $link"
+            activity.updateSelectedInfo(itemInfoWithLink)  // 업데이트된 정보를 리스트의 최상단에 추가
+
+            updateTextViewContent()
+        }
+    }
+
+    private fun updateTextViewContent() {
+        val activity = activity as MainActivity
+        val content = SpannableStringBuilder()
+
+        // selectedInfoList의 각 항목을 SpannableString으로 처리
+        for (infoWithLink in activity.selectedInfoList) {
+            val linkStart = infoWithLink.lastIndexOf(" - ") + 3
+            val info = infoWithLink.substring(0, linkStart - 3)  // 링크를 제외한 정보
+            val link = infoWithLink.substring(linkStart)  // 링크만 추출
+
+            val spannableString = SpannableString(info)
+
+            // 제품명에 대한 하이퍼링크 적용
+            val itemNameStart = info.indexOf('[')
+            val itemNameEnd = info.indexOf(']') + 1
+            if (itemNameStart >= 0 && itemNameEnd > itemNameStart && link.isNotEmpty()) {
+                spannableString.setSpan(object : ClickableSpan() {
+                    override fun onClick(widget: View) {
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+                            context?.startActivity(intent)
+                        } catch (e: Exception) {
+                            Log.e("LipFragment", "Error opening link: ${e.message}")
+                            Toast.makeText(context, "링크를 열 수 없습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }, itemNameStart, itemNameEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+
+            // 항목을 content에 추가
+            content.append(spannableString).append("\n")
+        }
+
+        textViewContent.text = content
+        textViewContent.movementMethod = LinkMovementMethod.getInstance()
+    }
+
+    fun applyMakeup(base64Image: String, parsedImage: String, hairColor: List<Int>) {
+        val transparentColor = listOf(255, 255, 255, -11)
+        val mainActivity = activity as? MainActivity ?: return // MainActivity가 null이면 함수 종료
+        val makeupRequest = RetrofitDTO.MakeupRequest(
+            img = base64Image,
+            parsing = parsedImage,
+            skin_color = mainActivity.makeupColorInfo.skinColor ?: transparentColor,
+            hair_color = mainActivity.makeupColorInfo.hairColor ?: hairColor,
+            lip_color = mainActivity.makeupColorInfo.lipColor ?: transparentColor
+        )
+
+        api.postMakeup(makeupRequest).enqueue(object : Callback<RetrofitDTO.MakeupResponse> {
+            override fun onResponse(call: Call<RetrofitDTO.MakeupResponse>, response: Response<RetrofitDTO.MakeupResponse>) {
+                if (response.isSuccessful) {
+                    val responseBody = response.body()
+                    if (responseBody != null) {
+                        decodeBase64ToImageView(responseBody.changeImg)
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<RetrofitDTO.MakeupResponse>, t: Throwable) {
+                Log.e("Retrofit", "Failed to apply makeup: ${t.message}")
+            }
+        })
+    }
+
+    private fun convertImageViewToBase64(): String? {
+        val drawable = imgV.drawable as? BitmapDrawable
+        val bitmap = drawable?.bitmap
+        return if (bitmap != null) {
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+            val byteArray = byteArrayOutputStream.toByteArray()
+            Base64.encodeToString(byteArray, Base64.DEFAULT)
+        } else {
+            null
+        }
+    }
+
+    private fun decodeBase64ToImageView(base64String: String) {
+        if (base64String.isNotEmpty()) {
+            try {
+                val decodedBytes = Base64.decode(base64String, Base64.DEFAULT)
+                val decodedBitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                imgV.setImageBitmap(decodedBitmap)
+            } catch (e: IllegalArgumentException) {
+                Log.e("Retrofit", "Base64 decoding failed: ${e.message}")
+            }
+        }
+    }
+
+    private fun parseColor(colorHex: String): List<Int> {
+        val color = android.graphics.Color.parseColor(colorHex)
+        return listOf(
+            android.graphics.Color.red(color),
+            android.graphics.Color.green(color),
+            android.graphics.Color.blue(color),
+            1
+        )
     }
 }

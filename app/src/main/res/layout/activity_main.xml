@@ -15,7 +15,7 @@
         <!-- 수정할 사진 넣을 공간 -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="700dp"
+            android:layout_height="400dp"
             android:orientation="horizontal"
             android:layout_marginTop="90dp">
             <ImageView
@@ -44,6 +44,7 @@
                     android:textStyle="bold"
                     android:layout_weight="1"/>
                 <TextView
+                    android:id="@+id/btnClear"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="전체삭제"
@@ -59,8 +60,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
-
-
                 android:textSize="25dp"
                 android:maxLines="1"
                 android:ellipsize="end"/>
@@ -126,17 +125,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_gravity="bottom"
-        android:layout_marginBottom="10dp"
         android:layout_weight="1">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center">
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/logo"/>
-        </LinearLayout>
+        <!-- 로고 프래그먼트 -->
     </FrameLayout>
 
     <!--  하단 카테고리바(피부, 립, 헤어 선택가능)  -->
@@ -152,6 +142,7 @@
             android:layout_height="match_parent"
             android:text="피부"
             android:textSize="30sp"
+            android:textColor="@color/black"
             android:gravity="center"
             android:layout_weight="1"/>
         <TextView
@@ -160,6 +151,7 @@
             android:layout_height="match_parent"
             android:text="립"
             android:textSize="30sp"
+            android:textColor="@color/black"
             android:gravity="center"
             android:layout_weight="1"/>
         <TextView
@@ -168,6 +160,7 @@
             android:layout_height="match_parent"
             android:text="헤어"
             android:textSize="30sp"
+            android:textColor="@color/black"
             android:gravity="center"
             android:layout_weight="1"/>
     </LinearLayout>

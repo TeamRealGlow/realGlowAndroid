@@ -15,7 +15,8 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
             <TabWidget
                 android:id="@android:id/tabs"
                 android:layout_width="wrap_content"
@@ -46,27 +47,22 @@
                             android:layout_width="120dp"
                             android:layout_height="120dp"
                             android:layout_margin="20dp"
-                            android:background="#FDF2D1"/>
+                            android:background="#FFE2A9"
+                            android:foreground="@drawable/border"
+                            android:clickable="true"
+                            android:focusable="true"/>
 
                         <View
                             android:id="@+id/skinColor1_2"
                             android:layout_width="120dp"
                             android:layout_height="120dp"
                             android:layout_margin="20dp"
-                            android:background="#FFF3C9"/>
+                            android:background="#E6B48A"
+                            android:foreground="@drawable/border"
+                            android:clickable="true"
+                            android:focusable="true"/>
 
-                        <View
-                            android:id="@+id/skinColor1_3"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#FDEEC0"/>
-                        <View
-                            android:id="@+id/skinColor1_4"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#FFE5B8"/>
+
 
                     </LinearLayout>
                 </LinearLayout>
@@ -91,76 +87,25 @@
                             android:layout_width="120dp"
                             android:layout_height="120dp"
                             android:layout_margin="20dp"
-                            android:background="#FAF0D3"/>
+                            android:background="#FFDE9C"
+                            android:foreground="@drawable/border"
+                            android:clickable="true"
+                            android:focusable="true"/>
 
                         <View
                             android:id="@+id/skinColor2_2"
                             android:layout_width="120dp"
                             android:layout_height="120dp"
                             android:layout_margin="20dp"
-                            android:background="#F8EECB"/>
+                            android:background="#D3A681"
+                            android:foreground="@drawable/border"
+                            android:clickable="true"
+                            android:focusable="true"/>
 
-                        <View
-                            android:id="@+id/skinColor2_3"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#F6E8BB"/>
-                        <View
-                            android:id="@+id/skinColor2_4"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#F4DDB4"/>
 
                     </LinearLayout>
 
                 </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:id="@+id/tabproduct3">
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-                        <ImageView
-                            android:id="@+id/skin_none3"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:src="@drawable/exclusion"/>
-                        <View
-                            android:id="@+id/skinColor3_1"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#FFF6DA"/>
-
-                        <View
-                            android:id="@+id/skinColor3_2"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#FDF2CE"/>
-                        <View
-                            android:id="@+id/skinColor3_3"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#F1E2B5"/>
-                        <View
-                            android:id="@+id/skinColor3_4"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#F4DBB0"/>
-
-                    </LinearLayout>
-                </LinearLayout>
-
 
 
             </FrameLayout>

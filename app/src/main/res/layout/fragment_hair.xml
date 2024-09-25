@@ -15,7 +15,8 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
             <TabWidget
                 android:id="@android:id/tabs"
                 android:layout_width="wrap_content"
@@ -46,7 +47,8 @@
                             android:layout_width="120dp"
                             android:layout_height="120dp"
                             android:layout_margin="20dp"
-                            android:background="@drawable/blue_border"
+                            android:background="#291C13"
+                            android:foreground="@drawable/border"
                             android:clickable="true"
                             android:focusable="true" />
 
@@ -55,21 +57,11 @@
                             android:layout_width="120dp"
                             android:layout_height="120dp"
                             android:layout_margin="20dp"
-                            android:background="#7C9A6F"/>
+                            android:background="#000000"
+                            android:foreground="@drawable/border"
+                            android:clickable="true"
+                            android:focusable="true"/>
 
-                        <View
-                            android:id="@+id/hairColor1_3"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#5E1E65"/>
-
-                        <View
-                            android:id="@+id/hairColor1_4"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#FF9DF1"/>
 
                     </LinearLayout>
                 </LinearLayout>
@@ -94,28 +86,21 @@
                             android:layout_width="120dp"
                             android:layout_height="120dp"
                             android:layout_margin="20dp"
-                            android:background="#BC0000"/>
+                            android:background="#010C30"
+                            android:foreground="@drawable/border"
+                            android:clickable="true"
+                            android:focusable="true"/>
 
                         <View
                             android:id="@+id/hairColor2_2"
                             android:layout_width="120dp"
                             android:layout_height="120dp"
                             android:layout_margin="20dp"
-                            android:background="#B9538EC8"/>
+                            android:background="#0047AB"
+                            android:foreground="@drawable/border"
+                            android:clickable="true"
+                            android:focusable="true"/>
 
-                        <View
-                            android:id="@+id/hairColor2_3"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#000000"/>
-
-                        <View
-                            android:id="@+id/hairColor2_4"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#FAEAB2"/>
 
                     </LinearLayout>
                 </LinearLayout>
@@ -140,123 +125,25 @@
                             android:layout_width="120dp"
                             android:layout_height="120dp"
                             android:layout_margin="20dp"
-                            android:background="#3A2E2E"/>
+                            android:background="#FFFFFF"
+                            android:foreground="@drawable/border"
+                            android:clickable="true"
+                            android:focusable="true"/>
 
                         <View
                             android:id="@+id/hairColor3_2"
                             android:layout_width="120dp"
                             android:layout_height="120dp"
                             android:layout_margin="20dp"
-                            android:background="@color/blue"/>
+                            android:background="#FF0000"
+                            android:foreground="@drawable/border"
+                            android:clickable="true"
+                            android:focusable="true"/>
 
-                        <View
-                            android:id="@+id/hairColor3_3"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#BA56C5"/>
-
-                        <View
-                            android:id="@+id/hairColor3_4"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#DD9CBD"/>
 
                     </LinearLayout>
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:id="@+id/tabproduct4">
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-                        <ImageView
-                            android:id="@+id/hair_none4"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:src="@drawable/exclusion"/>
-                        <View
-                            android:id="@+id/hairColor4_1"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#C35F5F"/>
-
-                        <View
-                            android:id="@+id/hairColor4_2"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#6A4C38"/>
-
-                        <View
-                            android:id="@+id/hairColor4_3"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#513C2C"/>
-
-                        <View
-                            android:id="@+id/hairColor4_4"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#F8955C20"/>
-
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:id="@+id/tabproduct5">
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-                        <ImageView
-                            android:id="@+id/hair_none5"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:src="@drawable/exclusion"/>
-                        <View
-                            android:id="@+id/hairColor5_1"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#95918B"/>
-
-                        <View
-                            android:id="@+id/hairColor5_2"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#DAB5C3"/>
-
-                        <View
-                            android:id="@+id/hairColor5_3"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#8A9C7F"/>
-
-                        <View
-                            android:id="@+id/hairColor5_4"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_margin="20dp"
-                            android:background="#0039E6"/>
-
-                    </LinearLayout>
-                </LinearLayout>
 
             </FrameLayout>
         </LinearLayout>

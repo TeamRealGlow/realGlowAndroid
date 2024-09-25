@@ -1,6 +1,7 @@
 package kr.ac.kopo.realglow
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,6 +14,11 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
@@ -25,8 +31,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -40,8 +44,45 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
+    // 각 선택된 정보를 저장할 리스트
+    val selectedInfoList: MutableList<String> = mutableListOf()
+
+    data class MakeupColorInfo(
+        var hairColor: List<Int>? = null,
+        var lipColor: List<Int>? = null,
+        var skinColor: List<Int>? = null
+    )
+
+    // 마지막에 선택된 색상 정보를 저장할 DTO
+    var makeupColorInfo: MakeupColorInfo = MakeupColorInfo()
+
+    // Getter와 Setter를 통해 색상 정보 업데이트
+    fun setHairColor(color: List<Int>) {
+        makeupColorInfo.hairColor = color
+    }
+
+    fun setLipColor(color: List<Int>) {
+        makeupColorInfo.lipColor = color
+    }
+
+    fun setSkinColor(color: List<Int>) {
+        makeupColorInfo.skinColor = color
+    }
+
+    // 선택된 정보를 업데이트하는 메서드 (기존 항목을 삭제하고 리스트 최상단에 추가)
+    // 선택된 정보를 업데이트하는 메서드 (같은 카테고리의 기존 항목을 지우고 새 항목을 추가)
+    fun updateSelectedInfo(newInfo: String) {
+        // 카테고리 이름 추출 (카테고리명은 아이템 정보 문자열의 처음에 있다고 가정)
+        val category = newInfo.split(" - ")[0]
+
+        // 같은 카테고리의 기존 항목이 있으면 제거
+        selectedInfoList.removeIf { it.startsWith(category) }
+
+        // 리스트 최상단에 새 항목 추가
+        selectedInfoList.add(0, newInfo)
+    }
+
     val CAMERA_CODE = 98
-    val STORAGE_CODE = 99
 
     lateinit var textViewContent: TextView
     lateinit var btnCapture: ImageButton
@@ -56,17 +97,35 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private var isExpanded = false
 
-    private lateinit var retrofit: Retrofit
-    private lateinit var api: RetrofitAPI
+    lateinit var retrofit: Retrofit
+
+    private var hairFragment: HairFragment? = null
+    private var lipFragment: LipFragment? = null
+    private var skinFragment: SkinFragment? = null
+
 
     companion object {
         const val GALLERY = 1
         const val REQUEST_IMAGE_CAPTURE = 2
     }
 
+    private var originalBase64Image: String? = null  // 원본 이미지를 저장할 변수
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Fragment 초기화 및 저장
+        hairFragment = HairFragment()
+        lipFragment = LipFragment()
+        skinFragment = SkinFragment()
+
+        // LogoFragment를 초기 상태로 추가
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentLayout, LogoFragment())
+                .commit()
+        }
 
         btnCapture = findViewById<ImageButton>(R.id.btnCapture)
         btnGallery = findViewById<ImageButton>(R.id.btnGallery)
@@ -88,10 +147,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        api = retrofit.create(RetrofitAPI::class.java)
-
-        val anotherLayout = LayoutInflater.from(this).inflate(R.layout.fragment_skin, null)
-
         //    더보기
         val textViewContent = findViewById<TextView>(R.id.textViewContent)
         val textExpand = findViewById<TextView>(R.id.textExpand)
@@ -107,6 +162,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             isExpanded = !isExpanded
         }
 
+        // '전체삭제' 버튼 클릭 리스너
+        val btnClear = findViewById<TextView>(R.id.btnClear)
+        btnClear.setOnClickListener {
+            resetToOriginalImage()  // 전체 삭제 동작
+        }
+
         // 사진 촬영
         btnCapture.setOnClickListener {
             if (checkPermission1()) {
@@ -120,14 +181,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         btnGallery.setOnClickListener {
             if (checkPermission2()) {
                 val intent: Intent = Intent(Intent.ACTION_GET_CONTENT)
-                intent.setType("image/*")
+                intent.type = "image/*"
                 startActivityForResult(intent, GALLERY)
             } else {
                 requestPermission2()
             }
         }
 
-        // 이미지 저장 및 서버로 전송
+        // 이미지 저장
         btnSave.setOnClickListener {
             val drawable = imgV.drawable
             if (drawable is BitmapDrawable) {
@@ -135,15 +196,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 val uri = saveFile(RandomFileName(), "image/png", bitmap)
                 if (uri != null) {
                     Toast.makeText(this, "이미지가 갤러리에 저장되었습니다.", Toast.LENGTH_SHORT).show()
-
-                    // 이미지 바이트코드로 변환하고 Base64로 인코딩
-                    val base64String = convertImageViewToBase64()
-                    if (base64String != null) {
-                        // Base64 문자열을 사용하여 서버에 전송
-                        sendImageToServer(base64String)
-                    } else {
-                        Toast.makeText(this, "이미지를 변환할 수 없습니다.", Toast.LENGTH_SHORT).show()
-                    }
                 } else {
                     Toast.makeText(this, "이미지 저장에 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }
@@ -153,21 +205,81 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    // 원본 이미지를 프래그먼트에서 가져갈 수 있게 하는 getter
+    fun getOriginalBase64Image(): String? {
+        return originalBase64Image
+    }
+
+    // 원본 이미지를 저장하는 함수 (갤러리/카메라에서 이미지 선택 시 호출)
+    private fun saveOriginalImage(bitmap: Bitmap) {
+        originalBase64Image = convertBitmapToBase64(bitmap)
+    }
+
+    // '전체삭제' 클릭 시 호출
+    private fun resetToOriginalImage() {
+        // 원본 이미지가 있을 경우 ImageView에 적용
+        if (originalBase64Image != null) {
+            decodeBase64ToImageView(originalBase64Image!!, findViewById(R.id.imgV))
+            Toast.makeText(this, "이미지가 초기화되었습니다.", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "초기 이미지가 없습니다.", Toast.LENGTH_SHORT).show()
+        }
+
+        // 선택된 정보 리스트 초기화
+        selectedInfoList.clear()
+
+        // 더보기란의 상품 정보 초기화
+        clearTextViewContent()
+
+        // 색상 정보 초기화
+        makeupColorInfo = MakeupColorInfo()
+
+        Toast.makeText(this, "전체 초기화되었습니다.", Toast.LENGTH_SHORT).show()
+    }
+
+    // Bitmap을 Base64로 변환
+    private fun convertBitmapToBase64(bitmap: Bitmap): String {
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+        val byteArray = byteArrayOutputStream.toByteArray()
+        return Base64.encodeToString(byteArray, Base64.DEFAULT)
+    }
+
+    // Base64 문자열을 ImageView에 디코딩하여 설정
+    private fun decodeBase64ToImageView(base64String: String, imageView: ImageView) {
+        val decodedBytes = Base64.decode(base64String, Base64.DEFAULT)
+        val decodedBitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+        imageView.setImageBitmap(decodedBitmap)
+    }
+
     override fun onClick(v: View) {
+        // 이미지뷰에 이미지가 없는 경우 토스트 메시지 출력
+        if (imgV.drawable == null) {
+            Toast.makeText(this, "원본 이미지가 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 모든 카테고리의 글자 색상을 기본 색상으로 초기화
+        resetCategoryColor()
+
+        // 클릭된 카테고리의 글자 색상을 빨간색으로 변경
         when (v.id) {
             R.id.category_skin -> {
+                category_skin.setTextColor(ContextCompat.getColor(this, R.color.red))
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.fragmentLayout, SkinFragment())
                     .commit()
             }
 
             R.id.category_lip -> {
+                category_lip.setTextColor(ContextCompat.getColor(this, R.color.red))
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.fragmentLayout, LipFragment())
                     .commit()
             }
 
             R.id.category_hair -> {
+                category_hair.setTextColor(ContextCompat.getColor(this, R.color.red))
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.fragmentLayout, HairFragment())
                     .commit()
@@ -221,37 +333,100 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    // 촬영한 사진, 갤러리에서 선택한 이미지를 이미지뷰에 연결
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode == Activity.RESULT_OK) {
+            // 기존 이미지, 색상 정보, 더보기란, 그리고 뷰 초기화
+            imgV.setImageDrawable(null)
+            resetMakeupColors()
+            clearTextViewContent()
+            resetToLogoState()
+
             if (requestCode == GALLERY) {
-                var ImageData: Uri? = data?.data
+                val imageData: Uri? = data?.data
                 try {
-                    val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, ImageData)
+                    val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, imageData)
                     imgV.setImageBitmap(bitmap)
+                    saveOriginalImage(bitmap) // 갤러리 이미지 저장
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
             } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
-                val imageBitmap: Bitmap? = data?.extras?.get("data") as Bitmap
-                imgV.setImageBitmap(imageBitmap)
+                if (photoURI != null) {
+                    val bitmap = loadBitmapFromMediaStoreBy(photoURI!!)
+                    if (bitmap != null) {
+                        imgV.setImageBitmap(bitmap)
+                        saveOriginalImage(bitmap) // 고해상도 이미지 저장
+                    } else {
+                        Log.e("MainActivity", "Failed to load bitmap from MediaStore.")
+                        Toast.makeText(this, "이미지를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                    photoURI = null
+                } else {
+                    val imageBitmap: Bitmap? = data?.extras?.get("data") as? Bitmap
+                    if (imageBitmap != null) {
+                        imgV.setImageBitmap(imageBitmap)
+                        saveOriginalImage(imageBitmap) // 썸네일 이미지 저장
+                    } else {
+                        Log.e("MainActivity", "Failed to retrieve image data.")
+                        Toast.makeText(this, "이미지를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
             } else if (requestCode == REQUEST_CREATE_EX) {
                 if (photoURI != null) {
                     val bitmap = loadBitmapFromMediaStoreBy(photoURI!!)
-                    imgV.setImageBitmap(bitmap)
+                    if (bitmap != null) {
+                        imgV.setImageBitmap(bitmap)
+                        saveOriginalImage(bitmap) // 고해상도 이미지 저장
+                    } else {
+                        Log.e("MainActivity", "Failed to load bitmap from MediaStore.")
+                        Toast.makeText(this, "이미지를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    }
                     photoURI = null
+                } else {
+                    Log.e("MainActivity", "photoURI is null, cannot load image.")
+                    Toast.makeText(this, "이미지를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
+    // 색상 정보 초기화 메서드
+    private fun resetMakeupColors() {
+        makeupColorInfo.hairColor = null
+        makeupColorInfo.lipColor = null
+        makeupColorInfo.skinColor = null
+    }
+
+    // 더보기란의 textViewContent 초기화 메서드
+    private fun clearTextViewContent() {
+        val textViewContent = findViewById<TextView>(R.id.textViewContent)
+        textViewContent.text = ""
+    }
+
+    // 뷰를 로고 상태로 초기화하는 메서드
+    private fun resetToLogoState() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentLayout, LogoFragment())
+            .commit()
+        resetCategoryColor()
+    }
+
+    private fun resetCategoryColor() {
+        // 모든 카테고리의 글자 색상을 기본 색상으로 초기화
+        category_skin.setTextColor(ContextCompat.getColor(this, R.color.black))
+        category_lip.setTextColor(ContextCompat.getColor(this, R.color.black))
+        category_hair.setTextColor(ContextCompat.getColor(this, R.color.black))
+    }
+
+
     // 카메라 원본 이미지를 저장하기 위한 이미지 경로 Uri 생성
     fun createImageUri(filename: String, mimeType: String): Uri? {
-        var values = ContentValues()
-        values.put(MediaStore.Images.Media.DISPLAY_NAME, filename)
-        values.put(MediaStore.Images.Media.MIME_TYPE, mimeType)
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+            put(MediaStore.Images.Media.MIME_TYPE, mimeType)
+        }
         return contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
     }
 
@@ -270,47 +445,39 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     // 생성된 Uri 경로에 이미지를 MediaStore를 사용해서 읽어옴.
     fun loadBitmapFromMediaStoreBy(photoUri: Uri): Bitmap? {
-        var image: Bitmap? = null
-        try {
-            image = if (Build.VERSION.SDK_INT > 27) {
-                val source: ImageDecoder.Source =
-                    ImageDecoder.createSource(this.contentResolver, photoUri)
+        return try {
+            if (Build.VERSION.SDK_INT > 27) {
+                val source: ImageDecoder.Source = ImageDecoder.createSource(this.contentResolver, photoUri)
                 ImageDecoder.decodeBitmap(source)
             } else {
                 MediaStore.Images.Media.getBitmap(this.contentResolver, photoUri)
             }
         } catch (e: IOException) {
             e.printStackTrace()
+            null
         }
-        return image
     }
 
     // 사진 저장
     fun saveFile(fileName: String, mimeType: String, bitmap: Bitmap): Uri? {
-        var CV = ContentValues()
-
-        // MediaStore 에 파일명, mimeType 을 지정
-        CV.put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
-        CV.put(MediaStore.Images.Media.MIME_TYPE, mimeType)
-
-        // 안정성 검사
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            CV.put(MediaStore.Images.Media.IS_PENDING, 1)
+        val CV = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+            put(MediaStore.Images.Media.MIME_TYPE, mimeType)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.Images.Media.IS_PENDING, 1)
+            }
         }
 
-        // MediaStore 에 파일을 저장
         val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, CV)
         if (uri != null) {
-            var scriptor = contentResolver.openFileDescriptor(uri, "w")
-
-            val fos = FileOutputStream(scriptor?.fileDescriptor)
-
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-            fos.close()
+            contentResolver.openFileDescriptor(uri, "w")?.use { scriptor ->
+                FileOutputStream(scriptor.fileDescriptor).use { fos ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+                }
+            }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 CV.clear()
-                // IS_PENDING 을 초기화
                 CV.put(MediaStore.Images.Media.IS_PENDING, 0)
                 contentResolver.update(uri, CV, null, null)
             }
@@ -320,131 +487,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     // 파일명을 날짜로 해서 저장
     fun RandomFileName(): String {
-        val fileName = SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis())
-        return fileName
-    }
-
-    // 이미지를 Base64 인코딩
-    fun convertImageViewToBase64(): String? {
-        val drawable = imgV.drawable as? BitmapDrawable
-        val bitmap = drawable?.bitmap
-
-        if (bitmap != null) {
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
-            val byteArray = byteArrayOutputStream.toByteArray()
-            return Base64.encodeToString(byteArray, Base64.DEFAULT)
-        }
-        return null
-    }
-
-    // Base64 문자열을 디코딩하여 ImageView에 표시하는 함수
-    fun decodeBase64ToImageView(base64String: String) {
-        if (base64String.isNotEmpty()) {
-            val decodedBytes = Base64.decode(base64String, Base64.DEFAULT)
-            val decodedBitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-            imgV.setImageBitmap(decodedBitmap)
-            Log.d("Retrofit", "Image successfully decoded and set to ImageView")
-        } else {
-            Log.e("Retrofit", "Received an empty base64 string")
-        }
-    }
-
-    // 이미지를 서버로 전송하는 함수
-    fun sendImageToServer(base64Image: String) {
-        val jsonObject = JsonObject().apply {
-            addProperty("img", base64Image)
-        }
-
-        api.postImage(jsonObject).enqueue(object : Callback<JsonObject> {
-            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
-                if (response.isSuccessful) {
-                    val responseBody = response.body()
-                    if (responseBody != null) {
-                        val parsedImage = responseBody.get("PNGImage").asString
-                        Log.d("Retrofit", "Parsed Image: $parsedImage")
-                        applyMakeup(parsedImage)
-                    }
-                } else {
-                    Log.e("Retrofit", "Error: ${response.code()} - ${response.message()}")
-                }
-            }
-
-            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
-                Log.e("Retrofit", "Failed to send image: ${t.message}")
-            }
-        })
-    }
-
-    // 메이크업 색상을 적용하고 이미지를 서버로 전송하는 함수
-    fun applyMakeup(parsedImage: String) {
-        val base64Image = convertImageViewToBase64()
-        if (base64Image != null) {
-            val color = parseColor("#FF5733") // 예시 색상, 실제 색상 값으로 변경 가능
-            val jsonObject = JsonObject().apply {
-                addProperty("img", base64Image)
-                addProperty("parsing", parsedImage)
-                add("skin_color", JsonArray().apply {
-                    add(JsonArray().apply {
-                        add(color[0])
-                        add(color[1])
-                        add(color[2])
-                    })
-                    add(1) // alpha 값을 추가
-                })
-                add("hair_color", JsonArray().apply {
-                    add(JsonArray().apply {
-                        add(color[0])
-                        add(color[1])
-                        add(color[2])
-                    })
-                    add(1) // alpha 값을 추가
-                })
-                add("lip_color", JsonArray().apply {
-                    add(JsonArray().apply {
-                        add(color[0])
-                        add(color[1])
-                        add(color[2])
-                    })
-                    add(1) // alpha 값을 추가
-                })
-            }
-
-
-            Log.d("Retrofit", "Makeup Request: $jsonObject")
-
-            api.postMakeup(jsonObject).enqueue(object : Callback<JsonObject> {
-                override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
-                    if (response.isSuccessful) {
-                        val responseBody = response.body()
-                        if (responseBody != null) {
-                            val changeFaceImg = responseBody.get("changeImg").asString
-                            Log.d("Retrofit", "Makeup Applied Image: $changeFaceImg")
-                            decodeBase64ToImageView(changeFaceImg)
-                        }
-                    } else {
-                        Log.e("Retrofit", "Error: ${response.code()} - ${response.message()}")
-                    }
-                }
-
-                override fun onFailure(call: Call<JsonObject>, t: Throwable) {
-                    Log.e("Retrofit", "Failed to apply makeup: ${t.message}")
-                }
-            })
-        } else {
-            Toast.makeText(this, "이미지를 변환할 수 없습니다.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    // Hex 색상을 RGB로 변환하는 함수
-    fun parseColor(colorHex: String): List<Int> {
-        val color = android.graphics.Color.parseColor(colorHex)
-        Log.d("Retrofit", "Parsed Color: R=${android.graphics.Color.red(color)}, G=${android.graphics.Color.green(color)}, B=${android.graphics.Color.blue(color)}")
-        return listOf(
-            android.graphics.Color.red(color),
-            android.graphics.Color.green(color),
-            android.graphics.Color.blue(color),
-            1
-        )
+        return SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis())
     }
 }

@@ -12,11 +12,9 @@ interface RetrofitAPI {
     fun getLoadItem(@Path("itemType") itemType: String): Call<JsonObject>
 
     @POST("/parsing")
-    fun postImage(@Body requestBody: JsonObject): Call<JsonObject>
+    fun postImage(@Body requestBody: RetrofitDTO.ParsingRequest): Call<RetrofitDTO.ParsingResponse>
 
     @POST("/makeup")
-    fun postMakeup(@Body requestBody: JsonObject): Call<JsonObject>
-
-
-
+    fun postMakeup(@Body requestBody: RetrofitDTO.MakeupRequest): Call<RetrofitDTO.MakeupResponse>
 }
+
