@@ -8,7 +8,6 @@
 
     <!-- TODO: Update blank fragment layout -->
 
-
     <TabHost
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -16,8 +15,8 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center">
+            android:layout_height="200dp"
+            android:layout_gravity="center_vertical">
             <TabWidget
                 android:id="@android:id/tabs"
                 android:layout_width="wrap_content"
@@ -39,14 +38,14 @@
                         android:orientation="horizontal">
                         <ImageView
                             android:id="@+id/skin_none1"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
                             android:layout_margin="20dp"
                             android:src="@drawable/exclusion"/>
                         <View
                             android:id="@+id/skinColor1_1"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
                             android:layout_margin="20dp"
                             android:background="#FFE2A9"
                             android:foreground="@drawable/border"
@@ -55,16 +54,13 @@
 
                         <View
                             android:id="@+id/skinColor1_2"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
                             android:layout_margin="20dp"
                             android:background="#E6B48A"
                             android:foreground="@drawable/border"
                             android:clickable="true"
                             android:focusable="true"/>
-
-
-
                     </LinearLayout>
                 </LinearLayout>
 
@@ -79,14 +75,14 @@
                         android:orientation="horizontal">
                         <ImageView
                             android:id="@+id/skin_none2"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
                             android:layout_margin="20dp"
                             android:src="@drawable/exclusion"/>
                         <View
                             android:id="@+id/skinColor2_1"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
                             android:layout_margin="20dp"
                             android:background="#FFDE9C"
                             android:foreground="@drawable/border"
@@ -95,23 +91,16 @@
 
                         <View
                             android:id="@+id/skinColor2_2"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
                             android:layout_margin="20dp"
                             android:background="#D3A681"
                             android:foreground="@drawable/border"
                             android:clickable="true"
                             android:focusable="true"/>
-
-
                     </LinearLayout>
-
                 </LinearLayout>
-
-
             </FrameLayout>
         </LinearLayout>
     </TabHost>
-
-
 </FrameLayout>

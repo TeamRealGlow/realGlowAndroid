@@ -123,10 +123,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         // LogoFragment를 초기 상태로 추가
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentLayout, LogoFragment())
+                .replace(R.id.logoFragmentLayout, LogoFragment())
                 .commit()
         }
-
 
         btnCapture = findViewById<ImageButton>(R.id.btnCapture)
         btnGallery = findViewById<ImageButton>(R.id.btnGallery)
@@ -136,7 +135,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         category_skin = findViewById<TextView>(R.id.category_skin)
         category_lip = findViewById<TextView>(R.id.category_lip)
         category_hair = findViewById<TextView>(R.id.category_hair)
-        fragmentLayout = findViewById<FrameLayout>(R.id.fragmentLayout)
+        fragmentLayout = findViewById<FrameLayout>(R.id.logoFragmentLayout)
 
         category_skin.setOnClickListener(this)
         category_lip.setOnClickListener(this)
@@ -268,21 +267,21 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             R.id.category_skin -> {
                 category_skin.setTextColor(ContextCompat.getColor(this, R.color.red))
                 supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentLayout, SkinFragment())
+                    .replace(R.id.logoFragmentLayout, SkinFragment())
                     .commit()
             }
 
             R.id.category_lip -> {
                 category_lip.setTextColor(ContextCompat.getColor(this, R.color.red))
                 supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentLayout, LipFragment())
+                    .replace(R.id.logoFragmentLayout, LipFragment())
                     .commit()
             }
 
             R.id.category_hair -> {
                 category_hair.setTextColor(ContextCompat.getColor(this, R.color.red))
                 supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentLayout, HairFragment())
+                    .replace(R.id.logoFragmentLayout, HairFragment())
                     .commit()
             }
         }
@@ -355,12 +354,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
             } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 if (photoURI != null) {
-                    val bitmap = loadBitmapFromMediaStoreBy(photoURI!!)
-                    if (bitmap != null) {
-                        imgV.setImageBitmap(bitmap)
-                        saveOriginalImage(bitmap) // 고해상도 이미지 저장
-                    } else {
-                        Log.e("MainActivity", "Failed to load bitmap from MediaStore.")
+                    try {
+                        var bitmap = loadBitmapFromMediaStoreBy(photoURI!!)
+                        if (bitmap != null) {
+                            // 이미지 리사이징 (가로 세로 최대 700x700)
+                            bitmap = resizeBitmap(bitmap, 700, 700)
+                            imgV.setImageBitmap(bitmap)
+                            saveOriginalImage(bitmap) // 리사이징된 이미지 저장
+                        } else {
+                            Log.e("MainActivity", "Failed to load bitmap from MediaStore.")
+                            Toast.makeText(this, "이미지를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Log.e("MainActivity", "Failed to load bitmap from MediaStore: ${e.message}")
                         Toast.makeText(this, "이미지를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
                     }
                     photoURI = null
@@ -376,12 +382,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
             } else if (requestCode == REQUEST_CREATE_EX) {
                 if (photoURI != null) {
-                    val bitmap = loadBitmapFromMediaStoreBy(photoURI!!)
-                    if (bitmap != null) {
-                        imgV.setImageBitmap(bitmap)
-                        saveOriginalImage(bitmap) // 고해상도 이미지 저장
-                    } else {
-                        Log.e("MainActivity", "Failed to load bitmap from MediaStore.")
+                    try {
+                        var bitmap = loadBitmapFromMediaStoreBy(photoURI!!)
+                        if (bitmap != null) {
+                            // 이미지 리사이징 (가로 세로 최대 700x700)
+                            bitmap = resizeBitmap(bitmap, 700, 700)
+                            imgV.setImageBitmap(bitmap)
+                            saveOriginalImage(bitmap) // 리사이징된 이미지 저장
+                        } else {
+                            Log.e("MainActivity", "Failed to load bitmap from MediaStore.")
+                            Toast.makeText(this, "이미지를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Log.e("MainActivity", "Failed to load bitmap from MediaStore: ${e.message}")
                         Toast.makeText(this, "이미지를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
                     }
                     photoURI = null
@@ -391,6 +404,25 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
             }
         }
+    }
+
+    // 리사이징 함수 추가
+    private fun resizeBitmap(original: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
+        val width = original.width
+        val height = original.height
+
+        val ratioBitmap = width.toFloat() / height.toFloat()
+        val ratioMax = maxWidth.toFloat() / maxHeight.toFloat()
+
+        var finalWidth = maxWidth
+        var finalHeight = maxHeight
+        if (ratioBitmap > ratioMax) {
+            finalHeight = (maxWidth / ratioBitmap).toInt()
+        } else {
+            finalWidth = (maxHeight * ratioBitmap).toInt()
+        }
+
+        return Bitmap.createScaledBitmap(original, finalWidth, finalHeight, true)
     }
 
     // 색상 정보 초기화 메서드
@@ -409,7 +441,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     // 뷰를 로고 상태로 초기화하는 메서드
     private fun resetToLogoState() {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentLayout, LogoFragment())
+            .replace(R.id.logoFragmentLayout, LogoFragment())
             .commit()
         resetCategoryColor()
     }

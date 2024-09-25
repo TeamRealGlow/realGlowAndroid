@@ -60,13 +60,19 @@ class SkinFragment : Fragment() {
 
         var spec = tabHost.newTabSpec("Tab 1")
         spec.setContent(R.id.tabproduct1)
-        spec.setIndicator("제품명1")
+        spec.setIndicator("실키 스테이")
         tabHost.addTab(spec)
 
         spec = tabHost.newTabSpec("Tab 2")
         spec.setContent(R.id.tabproduct2)
-        spec.setIndicator("제품명2")
+        spec.setIndicator("디자이너 리프트")
         tabHost.addTab(spec)
+
+        // TabWidget에서 각 탭의 TextView를 가져와서 텍스트 크기를 변경
+        for (i in 0 until tabHost.tabWidget.childCount) {
+            val tv = tabHost.tabWidget.getChildAt(i).findViewById<TextView>(android.R.id.title)
+            tv.textSize = 25f  // 텍스트 크기를 20sp로 설정
+        }
 
         view.findViewById<View>(R.id.skin_none1).setOnClickListener {
             handleSkinColorClick(it, -1, -1)
@@ -101,7 +107,6 @@ class SkinFragment : Fragment() {
                 // 더보기란에서 헤어 관련 정보 삭제
                 activity.selectedInfoList.removeIf { it.startsWith("Skin") }
                 updateTextViewContent()  // 더보기란 갱신
-                Toast.makeText(activity, "헤어 색상이 초기화되었습니다.", Toast.LENGTH_SHORT).show()
             } else {
                 // 새로운 색상을 선택한 경우
                 val currentColor = dataList[rowIndex].Color[colorIndex]
