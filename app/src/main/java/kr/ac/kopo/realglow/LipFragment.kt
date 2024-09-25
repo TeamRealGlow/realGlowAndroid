@@ -101,6 +101,7 @@ class LipFragment : Fragment() {
         }
     }
 
+
     private fun handleLipColorClick(view: View, rowIndex: Int, colorIndex: Int) {
         val activity = activity as MainActivity
         val base64Image = activity.getOriginalBase64Image()

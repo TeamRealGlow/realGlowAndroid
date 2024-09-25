@@ -16,3 +16,4 @@ class LogoFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_logo, container, false)
     }
 }
+

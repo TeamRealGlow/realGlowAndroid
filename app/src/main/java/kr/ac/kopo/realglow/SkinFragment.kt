@@ -36,6 +36,7 @@ class SkinFragment : Fragment() {
     private var dataList: List<RetrofitDTO.skinText.Row> = listOf()
     private var selectedView: View? = null
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

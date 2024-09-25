@@ -127,6 +127,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 .commit()
         }
 
+
         btnCapture = findViewById<ImageButton>(R.id.btnCapture)
         btnGallery = findViewById<ImageButton>(R.id.btnGallery)
         btnSave = findViewById<ImageButton>(R.id.btnSave)

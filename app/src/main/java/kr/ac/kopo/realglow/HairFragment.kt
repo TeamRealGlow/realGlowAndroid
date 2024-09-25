@@ -100,6 +100,7 @@ class HairFragment : Fragment() {
         }
     }
 
+
     private fun handleHairColorClick(view: View?, rowIndex: Int, colorIndex: Int) {
         val activity = activity as MainActivity
         val base64Image = activity.getOriginalBase64Image()

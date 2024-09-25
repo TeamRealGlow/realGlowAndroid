@@ -17,6 +17,7 @@ class RetrofitDTO {
 
     }
 
+
     data class skinText
         (
         val Category: String,

@@ -18,3 +18,4 @@ interface RetrofitAPI {
     fun postMakeup(@Body requestBody: RetrofitDTO.MakeupRequest): Call<RetrofitDTO.MakeupResponse>
 }
 
+
