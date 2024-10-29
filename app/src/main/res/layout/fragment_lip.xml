@@ -47,7 +47,7 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:layout_margin="20dp"
-                            android:background="#FF0000"
+                            android:background="#FF8C8C"
                             android:foreground="@drawable/border"
                             android:clickable="true"
                             android:focusable="true"/>
@@ -56,7 +56,16 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:layout_margin="20dp"
-                            android:background="#FF8A8A"
+                            android:background="#FF5A5A"
+                            android:foreground="@drawable/border"
+                            android:clickable="true"
+                            android:focusable="true"/>
+                        <View
+                            android:id="@+id/lipColor1_3"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:layout_margin="20dp"
+                            android:background="#D6A28B"
                             android:foreground="@drawable/border"
                             android:clickable="true"
                             android:focusable="true"/>
@@ -83,7 +92,7 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:layout_margin="20dp"
-                            android:background="#FF2400"
+                            android:background="#FF4324"
                             android:foreground="@drawable/border"
                             android:clickable="true"
                             android:focusable="true"/>
@@ -92,7 +101,16 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:layout_margin="20dp"
-                            android:background="#DC143C"
+                            android:background="#E84667"
+                            android:foreground="@drawable/border"
+                            android:clickable="true"
+                            android:focusable="true"/>
+                        <View
+                            android:id="@+id/lipColor2_3"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:layout_margin="20dp"
+                            android:background="#F87E3D"
                             android:foreground="@drawable/border"
                             android:clickable="true"
                             android:focusable="true"/>
@@ -119,7 +137,7 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:layout_margin="20dp"
-                            android:background="#000000"
+                            android:background="#FF9A9A"
                             android:foreground="@drawable/border"
                             android:clickable="true"
                             android:focusable="true"/>
@@ -128,7 +146,16 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:layout_margin="20dp"
-                            android:background="#0000FF"
+                            android:background="#EA916E"
+                            android:foreground="@drawable/border"
+                            android:clickable="true"
+                            android:focusable="true"/>
+                        <View
+                            android:id="@+id/lipColor3_3"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:layout_margin="20dp"
+                            android:background="#FF0059"
                             android:foreground="@drawable/border"
                             android:clickable="true"
                             android:focusable="true"/>

@@ -3,5 +3,5 @@
     <solid android:color="@android:color/transparent" /> <!-- 배경색은 투명 -->
     <stroke
         android:width="8dp"
-        android:color="#FFE017"/> <!-- 파란색 테두리 -->
+        android:color="#83FF17"/> <!-- 파란색 테두리 -->
 </shape>

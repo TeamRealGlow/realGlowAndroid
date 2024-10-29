@@ -60,7 +60,7 @@ class SkinFragment : Fragment() {
 
         var spec = tabHost.newTabSpec("Tab 1")
         spec.setContent(R.id.tabproduct1)
-        spec.setIndicator("실키 스테이")
+        spec.setIndicator("밀키스테이")
         tabHost.addTab(spec)
 
         spec = tabHost.newTabSpec("Tab 2")
@@ -86,11 +86,17 @@ class SkinFragment : Fragment() {
         view.findViewById<View>(R.id.skinColor1_2).setOnClickListener {
             handleSkinColorClick(it, 0, 1)
         }
+        view.findViewById<View>(R.id.skinColor1_3).setOnClickListener {
+            handleSkinColorClick(it, 0, 2)
+        }
         view.findViewById<View>(R.id.skinColor2_1).setOnClickListener {
             handleSkinColorClick(it, 1, 0)
         }
         view.findViewById<View>(R.id.skinColor2_2).setOnClickListener {
             handleSkinColorClick(it, 1, 1)
+        }
+        view.findViewById<View>(R.id.skinColor2_3).setOnClickListener {
+            handleSkinColorClick(it, 1, 2)
         }
     }
 

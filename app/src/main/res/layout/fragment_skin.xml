@@ -47,7 +47,7 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:layout_margin="20dp"
-                            android:background="#FFE2A9"
+                            android:background="#FBE6BD"
                             android:foreground="@drawable/border"
                             android:clickable="true"
                             android:focusable="true"/>
@@ -57,7 +57,16 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:layout_margin="20dp"
-                            android:background="#E6B48A"
+                            android:background="#FFD8B8"
+                            android:foreground="@drawable/border"
+                            android:clickable="true"
+                            android:focusable="true"/>
+                        <View
+                            android:id="@+id/skinColor1_3"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:layout_margin="20dp"
+                            android:background="#FFD4AF"
                             android:foreground="@drawable/border"
                             android:clickable="true"
                             android:focusable="true"/>
@@ -84,7 +93,7 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:layout_margin="20dp"
-                            android:background="#FFDE9C"
+                            android:background="#FFE5B2"
                             android:foreground="@drawable/border"
                             android:clickable="true"
                             android:focusable="true"/>
@@ -94,7 +103,16 @@
                             android:layout_width="100dp"
                             android:layout_height="100dp"
                             android:layout_margin="20dp"
-                            android:background="#D3A681"
+                            android:background="#FFD3AE"
+                            android:foreground="@drawable/border"
+                            android:clickable="true"
+                            android:focusable="true"/>
+                        <View
+                            android:id="@+id/skinColor2_3"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:layout_margin="20dp"
+                            android:background="#EFC4A0"
                             android:foreground="@drawable/border"
                             android:clickable="true"
                             android:focusable="true"/>

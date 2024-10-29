@@ -63,7 +63,7 @@ class HairFragment : Fragment() {
 
         spec = tabHost.newTabSpec("Tab 2")
         spec.setContent(R.id.tabproduct2)
-        spec.setIndicator("헬로크림 염색")
+        spec.setIndicator("하이크림 염색")
         tabHost.addTab(spec)
 
         spec = tabHost.newTabSpec("Tab 3")
@@ -92,17 +92,26 @@ class HairFragment : Fragment() {
         view.findViewById<View>(R.id.hairColor1_2).setOnClickListener {
             handleHairColorClick(it, 0, 1)
         }
+        view.findViewById<View>(R.id.hairColor1_3).setOnClickListener {
+            handleHairColorClick(it, 0, 2)
+        }
         view.findViewById<View>(R.id.hairColor2_1).setOnClickListener {
             handleHairColorClick(it, 1, 0)
         }
         view.findViewById<View>(R.id.hairColor2_2).setOnClickListener {
             handleHairColorClick(it, 1, 1)
         }
+        view.findViewById<View>(R.id.hairColor2_3).setOnClickListener {
+            handleHairColorClick(it, 1, 2)
+        }
         view.findViewById<View>(R.id.hairColor3_1).setOnClickListener {
             handleHairColorClick(it, 2, 0)
         }
         view.findViewById<View>(R.id.hairColor3_2).setOnClickListener {
             handleHairColorClick(it, 2, 1)
+        }
+        view.findViewById<View>(R.id.hairColor3_3).setOnClickListener {
+            handleHairColorClick(it, 2, 2)
         }
     }
 

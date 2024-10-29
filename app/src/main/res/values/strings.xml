@@ -3,7 +3,7 @@
     <string name="app_name">realGlow</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="baseUrl">http://192.168.26.169:1234</string>
+    <string name="baseUrl">http://realglow.aikopo.net:8504</string>
     <string name="Item">hairitem</string>
 
 </resources>

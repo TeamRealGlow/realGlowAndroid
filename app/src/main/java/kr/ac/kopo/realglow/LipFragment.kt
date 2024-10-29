@@ -59,7 +59,7 @@ class LipFragment : Fragment() {
 
         var spec = tabHost.newTabSpec("Tab 1")
         spec.setContent(R.id.tabproduct1)
-        spec.setIndicator("벨벳 틴트")
+        spec.setIndicator("소프트 벨벳 틴트")
         tabHost.addTab(spec)
 
         spec = tabHost.newTabSpec("Tab 2")
@@ -69,7 +69,7 @@ class LipFragment : Fragment() {
 
         spec = tabHost.newTabSpec("Tab 3")
         spec.setContent(R.id.tabproduct3)
-        spec.setIndicator("글로우 틴트")
+        spec.setIndicator("퓨어 틴트 립밤")
         tabHost.addTab(spec)
 
         // TabWidget에서 각 탭의 TextView를 가져와서 텍스트 크기를 변경
@@ -93,17 +93,26 @@ class LipFragment : Fragment() {
         view.findViewById<View>(R.id.lipColor1_2).setOnClickListener {
             handleLipColorClick(it, 0, 1)
         }
+        view.findViewById<View>(R.id.lipColor1_3).setOnClickListener {
+            handleLipColorClick(it, 0, 2)
+        }
         view.findViewById<View>(R.id.lipColor2_1).setOnClickListener {
             handleLipColorClick(it, 1, 0)
         }
         view.findViewById<View>(R.id.lipColor2_2).setOnClickListener {
             handleLipColorClick(it, 1, 1)
         }
+        view.findViewById<View>(R.id.lipColor2_3).setOnClickListener {
+            handleLipColorClick(it, 1, 2)
+        }
         view.findViewById<View>(R.id.lipColor3_1).setOnClickListener {
             handleLipColorClick(it, 2, 0)
         }
         view.findViewById<View>(R.id.lipColor3_2).setOnClickListener {
             handleLipColorClick(it, 2, 1)
+        }
+        view.findViewById<View>(R.id.lipColor3_3).setOnClickListener {
+            handleLipColorClick(it, 2, 2)
         }
     }
 
